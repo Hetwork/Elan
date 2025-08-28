@@ -8,6 +8,7 @@ import {
   Dimensions,
   FlatList,
   Animated,
+  Alert,
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -17,6 +18,8 @@ interface Product {
   name: string;
   productCount: string;
   image: string;
+  color?: string;
+  textColor?: string;
 }
 
 interface GridViewProps {
@@ -69,7 +72,7 @@ export default function GridView({ products }: GridViewProps) {
   // Render Grid View Product Card
   const renderProductCard = ({ item, index }: { item: Product; index: number }) => (
     <View style={styles.productCard}>
-      <TouchableOpacity>
+      <TouchableOpacity onPress={() => Alert.alert('Collection Selected', `You selected ${item.name} collection with ${item.productCount}`)}>
         <View style={styles.imageContainer}>
           <Animated.Image 
             source={{ uri: item.image }} 

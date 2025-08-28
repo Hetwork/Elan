@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Animated,
+  Alert,
 } from 'react-native';
 import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view';
 
@@ -117,7 +118,7 @@ export default function ExperienceView({ products }: ExperienceViewProps) {
                 },
               ]}>
               <TouchableOpacity
-                onPress={() => alert(`Clicked on ${item.name}`)}
+                onPress={() => Alert.alert('Product Selected', `You selected ${item.name}\n${item.productCount}`)}
                 style={styles.touchableArea}>
                 <Image source={{ uri: item.image }} style={styles.productImage} />
               </TouchableOpacity>

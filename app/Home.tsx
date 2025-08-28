@@ -6,76 +6,33 @@ import {
   StatusBar,
   StyleSheet,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import { FontAwesome, Fontisto, AntDesign, Feather } from '@expo/vector-icons';
 import ExperienceView from '../components/ExperienceView';
 import GridView from '../components/GridView';
+import { useGetAllProducts } from '../utils/Hooks/ProductsHook';
+import { useGetAllCollections } from '../utils/Hooks/collectionHook';
 
 const { width } = Dimensions.get('window');
-
-// Example product data - enhanced for grid view
-const products = [
-  {
-    id: 1,
-    name: 'Midori Plate',
-    productCount: '4 Products',
-    image:
-      'https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/67d970cf3163f9824c3a12c2_Midori%20Plate%2023%2C5.webp',
-  },
-  {
-    id: 2,
-    name: 'Miami Saucer',
-    productCount: '5 Products',
-    image:
-      'https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/67d9707eab0def13c185226a_Miami%20Saucer%2014.webp',
-  },
-  {
-    id: 3,
-    name: 'Ruston Plate',
-    productCount: '8 Products',
-    image:
-      'https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/67d971124ae04d418efb01c7_Ruston%20Plate%2027.webp',
-  },
-  {
-    id: 4,
-    name: 'Barolo Plate',
-    productCount: '6 Products',
-    image:
-      'https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/67d96d19cd7ab59d28b45037_Barolo%20Plate%2028.webp',
-  },
-  {
-    id: 5,
-    name: 'Deep Plate',
-    productCount: '3 Products',
-    image:
-      'https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836da17f598be5f1ff00aa5_Deep%20plate%2016.webp',
-  },
-  {
-    id: 6,
-    name: 'Kiryu Plate',
-    productCount: '9 Products',
-    image:
-      'https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/67d96ebd7bed792e812eca91_Kiryu%20Plate%2023%2C5.webp',
-  },
-  {
-    id: 7,
-    name: 'Light Blue Sea Bowl',
-    productCount: '7 Products',
-    image:
-      'https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/67d96efac6037c23fa15d6c4_Light%20Blue%20Sea%20Bowl%2016.webp',
-  },
-  {
-    id: 8,
-    name: 'Barolo Collection',
-    productCount: '6 Products',
-    image:
-      'https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/67d96d19cd7ab59d28b45037_Barolo%20Plate%2028.webp',
-  },
-];
 
 export default function App() {
   const [isExperienceView, setIsExperienceView] = useState(true);
   const [isMenuVisible, setIsMenuVisible] = useState(false);
+
+  // Fetch data using TanStack Query hooks
+  const { data: products = [], isLoading: productsLoading, error: productsError } = useGetAllProducts();
+  const { data: collections = [], isLoading: collectionsLoading, error: collectionsError } = useGetAllCollections();
+
+  // Debug: Log data when it loads
+  React.useEffect(() => {
+    if (products.length > 0) {
+      console.log(`Loaded ${products.length} products`);
+    }
+    if (collections.length > 0) {
+      console.log(`Loaded ${collections.length} collections`);
+    }
+  }, [products, collections]);
 
   const toggleView = () => {
     setIsExperienceView(!isExperienceView);
@@ -85,15 +42,55 @@ export default function App() {
     setIsMenuVisible(!isMenuVisible);
   };
 
+  // Show loading indicator while data is being fetched
+  if (productsLoading || collectionsLoading) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color="#333" />
+        <Text style={styles.loadingText}>Loading...</Text>
+      </View>
+    );
+  }
+
+  // Show error state if data failed to load
+  if (productsError || collectionsError) {
+    return (
+      <View style={[styles.container, styles.errorContainer]}>
+        <Text style={styles.errorText}>Error loading data</Text>
+        <Text style={styles.errorSubtext}>Please try again later</Text>
+      </View>
+    );
+  }
+
+  // Transform products data for ExperienceView
+  const transformedProducts = products
+    .filter(product => product.name && product.image) // Filter out empty products
+    .map(product => ({
+      id: product.id,
+      name: product.name,
+      productCount: `${product.product_type} - ${product.size}`,
+      image: product.image,
+    }));
+
+  // Transform collections data for GridView
+  const transformedCollections = collections.map(collection => ({
+    id: collection.id,
+    name: collection.name,
+    productCount: `${collection.products} Products`,
+    image: collection.dish_image,
+    color: collection.color,
+    textColor: collection.textcolor,
+  }));
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       
       {/* Dynamic Content Area */}
       {isExperienceView ? (
-        <ExperienceView products={products} />
+        <ExperienceView products={transformedProducts} />
       ) : (
-        <GridView products={products} />
+        <GridView products={transformedCollections} />
       )}
 
       {/* Top Header - Floating */}
@@ -185,6 +182,30 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f8f3',
+  },
+  // Loading and error states
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#333',
+  },
+  errorContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorText: {
+    fontSize: 18,
+    color: '#333',
+    fontWeight: 'bold',
+  },
+  errorSubtext: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 5,
   },
   // Header styles
   headerFloating: {

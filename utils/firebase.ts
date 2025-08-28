@@ -1,11 +1,9 @@
-import { initializeApp } from 'firebase/app';
-
-// Optionally import the services that you want to use
-// import {...} from "firebase/auth";
-// import {...} from "firebase/database";
-// import {...} from "firebase/firestore";
-// import {...} from "firebase/functions";
-// import {...} from "firebase/storage";
+import { initializeApp, getApps } from 'firebase/app';
+import { getAuth, initializeAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
+import { getDatabase } from 'firebase/database';
+import { Platform } from 'react-native';
 
 // Initialize Firebase
 const firebaseConfig = {
@@ -19,8 +17,37 @@ const firebaseConfig = {
   measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-const firebase = initializeApp(firebaseConfig);
-// For more information on how to access Firebase in your project,
-// see the Firebase documentation: https://firebase.google.com/docs/web/setup#access-firebase
+// Initialize Firebase App
+let firebase;
+if (getApps().length === 0) {
+  firebase = initializeApp(firebaseConfig);
+} else {
+  firebase = getApps()[0];
+}
 
+// Initialize Firebase Auth
+let auth;
+try {
+  // For React Native, we use initializeAuth for better persistence
+  if (Platform.OS === 'android' || Platform.OS === 'ios') {
+    auth = initializeAuth(firebase);
+  } else {
+    auth = getAuth(firebase);
+  }
+} catch (error) {
+  // If auth is already initialized, get the existing instance
+  auth = getAuth(firebase);
+}
+
+// Initialize Firestore
+const db = getFirestore(firebase);
+
+// Initialize Firebase Storage
+const storage = getStorage(firebase);
+
+// Initialize Realtime Database
+const database = getDatabase(firebase);
+
+// Export Firebase services
+export { auth, db, storage, database };
 export default firebase;

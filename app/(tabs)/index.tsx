@@ -1,7 +1,8 @@
 import { router, Stack } from 'expo-router';
 
 import { StyleSheet, TouchableOpacity, View,Text } from 'react-native';
-import { uploadProducts } from '~/json/productupload';
+
+// import { uploadProducts } from '~/json/productupload';
 
 
 export default function Home() {
@@ -23,12 +24,18 @@ export default function Home() {
         <TouchableOpacity style={{ padding: 20, backgroundColor: '#ccc', borderRadius: 5 }} onPress={() => router.push('/test')}>
           <Text>Open Test Screen</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={{ padding: 20, backgroundColor: '#007AFF', borderRadius: 5 }} onPress={() => router.push('/miami-products')}>
+        <TouchableOpacity style={{ padding: 20, backgroundColor: '#ccc', borderRadius: 5 }} onPress={() => router.push('/contact')}>
+          <Text>Open Contact Screen</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={{ padding: 20, backgroundColor: '#007AFF', borderRadius: 5 }} onPress={() => router.push({
+          pathname: '/miami-products',
+          params: { collectionId: '3' } // Miami collection ID
+        })}>
           <Text style={{ color: 'white' }}>Miami Products Collection</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={{ padding: 20, backgroundColor: '#007AFF', borderRadius: 5 }} onPress={() => uploadProducts()}>
+        {/* <TouchableOpacity style={{ padding: 20, backgroundColor: '#007AFF', borderRadius: 5 }} onPress={() => uploadProducts()}>
           <Text style={{ color: 'white' }}>Products Upload</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
     </>
   );

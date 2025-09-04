@@ -1,6 +1,4 @@
-import { db } from '../firebase';
-import { collection, getDocs, query, where } from 'firebase/firestore';
-import collectionData from '../../json/collection.json';
+import { db, collection, getDocs, doc, getDoc, query, where } from '../firebase';
 
 // Type definitions
 export interface Collection {
@@ -22,72 +20,21 @@ export interface Collection {
 }
 
 /**
- * Get all collections from local JSON file
- * @returns Array of all collections
- */
-export const getAllCollections = async () => {
-  try {
-    return collectionData as Collection[];
-  } catch (error) {
-    console.error('Error getting all collections:', error);
-    throw error;
-  }
-};
-
-/**
- * Get collection by name from local JSON file
- * @param name - The name of the collection to find
- * @returns Collection object or null if not found
- */
-export const getCollectionByName = async (name: string) => {
-  try {
-    const collections = collectionData as Collection[];
-    const collection = collections.find(
-      (collection) => collection.name.toLowerCase() === name.toLowerCase()
-    );
-    return collection || null;
-  } catch (error) {
-    console.error('Error getting collection by name:', error);
-    throw error;
-  }
-};
-
-/**
- * Get collection by ID from local JSON file
- * @param id - The ID of the collection to find
- * @returns Collection object or null if not found
- */
-export const getCollectionById = async (id: number) => {
-  try {
-    const collections = collectionData as Collection[];
-    const collection = collections.find((collection) => collection.id === id);
-    return collection || null;
-  } catch (error) {
-    console.error('Error getting collection by ID:', error);
-    throw error;
-  }
-};
-
-// Firebase-based functions (alternative implementation)
-/**
  * Get all collections from Firestore
  * @returns Array of all collections from Firestore
  */
-export const getAllCollectionsFromFirestore = async () => {
+export const getAllCollectionsFromFirestore = async (): Promise<Collection[]> => {
   try {
     const collectionsRef = collection(db, 'collections');
     const querySnapshot = await getDocs(collectionsRef);
-    
-    const collections: Collection[] = [];
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      collections.push({ 
-        id: parseInt(doc.id), 
-        ...data 
-      } as unknown as Collection);
+
+    return querySnapshot.docs.map((docSnap: any) => {
+      const data = docSnap.data();
+      return {
+        id: data.id ?? Number(docSnap.id), // Prefer stored `id` if available
+        ...data,
+      } as Collection;
     });
-    
-    return collections;
   } catch (error) {
     console.error('Error getting collections from Firestore:', error);
     throw error;
@@ -95,28 +42,53 @@ export const getAllCollectionsFromFirestore = async () => {
 };
 
 /**
- * Get collection by name from Firestore
- * @param name - The name of the collection to find
+ * Get collection by ID from Firestore
+ * @param id - The Firestore document ID (string)
  * @returns Collection object or null if not found
  */
-export const getCollectionByNameFromFirestore = async (name: string) => {
+export const getCollectionByIdFromFirestore = async (
+  id: string
+): Promise<Collection | null> => {
+  try {
+    const collectionRef = doc(db, 'collections', id);
+    const docSnap = await getDoc(collectionRef);
+
+    if (!docSnap.exists()) return null;
+
+    const data = docSnap.data();
+    return {
+      id: data?.id ?? Number(docSnap.id),
+      ...data,
+    } as Collection;
+  } catch (error) {
+    console.error('Error getting collection by ID from Firestore:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get collection by collection ID (data field) from Firestore
+ * @param collectionId - The collection ID number stored in the data
+ * @returns Collection object or null if not found
+ */
+export const getCollectionByCollectionIdFromFirestore = async (
+  collectionId: number
+): Promise<Collection | null> => {
   try {
     const collectionsRef = collection(db, 'collections');
-    const q = query(collectionsRef, where('name', '==', name));
+    const q = query(collectionsRef, where('id', '==', collectionId));
     const querySnapshot = await getDocs(q);
-    
-    if (querySnapshot.empty) {
-      return null;
-    }
-    
-    const doc = querySnapshot.docs[0];
-    const data = doc.data();
-    return { 
-      id: parseInt(doc.id), 
-      ...data 
-    } as unknown as Collection;
+
+    if (querySnapshot.empty) return null;
+
+    const docSnap = querySnapshot.docs[0];
+    const data = docSnap.data();
+    return {
+      id: data.id ?? Number(docSnap.id),
+      ...data,
+    } as Collection;
   } catch (error) {
-    console.error('Error getting collection by name from Firestore:', error);
+    console.error('Error getting collection by collection ID from Firestore:', error);
     throw error;
   }
 };

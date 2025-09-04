@@ -17,61 +17,85 @@ import Animated, {
   Extrapolation
 } from "react-native-reanimated";
 import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useGetProductsByCollectionIdFromFirestore } from '../utils/Hooks/ProductsHook';
+import { useGetCollectionByIdFromFirestore } from '../utils/Hooks/collectionHook';
 
 const { width, height } = Dimensions.get("window");
 
-const images = [
-  "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836d225473ef3c104f2f836_Coco%20groen%20Beautyshot.webp",
-  "https://cdn.prod.website-files.com/677b8a552071e1f09b594a28/6836f65a91570332d79f23de_WM4646.webp"
-];
-
-const collectionImage = "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836d27e107b2be1f667459b_Coco%20groen%20van%20boven%207%20-%20kopie.webp";
-const parallaxImage = "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836d2990c3d21f37b395928_Coco%20groene%20ondergrond%20(1).webp";
-const plateImage = "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836d18c0c3d21f37b38963a_Coco%20green%20plate%2026.webp";
-const backgroundImage = "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/683703bc04c2e2b84dfa13cc_francesco-ungaro-wSQdTLkVacE-unsplash.webp";
-const backgroundColor = "#7b8772";
-const textColor = "#eceee9";
-
-// Product data for horizontal scroll (shown on last page)
-const products = [
-  {
-    id: 1,
-    name: "Bowl ø 9",
-    image: "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836e0c3b1aeba6d47db3e90_Bowl%209-1.webp"
-  },
-  {
-    id: 2,
-    name: "Deep Plate ø 16",
-    image: "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836e05bf598be5f1ff311d7_Deep%20plate%2016-1.webp"
-  },
-  {
-    id: 3,
-    name: "Plate ø 19",
-    image: "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836dfe00c3d21f37b42b89b_Plate%2019-2.webp"
-  },
-  {
-    id: 4,
-    name: "Plate ø 20.5",
-    image: "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836e0d8473ef3c104fc90c8_Oval%20Plate%2020%2C5-2.webp"
-  },
-  {
-    id: 5,
-    name: "Bowl ø 12",
-    image: "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836e0abb1aeba6d47db2946_Bowl%2012-1.webp"
-  },
-  {
-    id: 6,
-    name: "Plate ø 14.5",
-    image: "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836e038a53cab16be969d25_Plate%2014.5-2.webp"
-  },
-  {
-    id: 7,
-    name: "Plate ø 26",
-    image: "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836dfb8985d194078df100f_Plate%2027%2C5-1.webp"
-  }
-];
-
 export default function ElanHorizontalPager() {
+  const params = useLocalSearchParams();
+  const router = useRouter();
+  
+  // Get collection ID from params
+  const collectionId = parseInt(params.collectionId as string) || 6;
+  
+  // Get collection data from the service
+  const { data: collectionData, isLoading: collectionLoading } = useGetCollectionByIdFromFirestore(collectionId.toString());
+
+  console.log('Collection Data:', collectionData);
+
+  // Get products for this collection from Firestore
+  const { data: firestoreProducts = [], isLoading: productsLoading, error: productsError } = useGetProductsByCollectionIdFromFirestore(collectionId);
+  
+  // Use collection data or fallback defaults
+  const images = collectionData?.main_image || [
+    "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836d225473ef3c104f2f836_Coco%20groen%20Beautyshot.webp",
+    "https://cdn.prod.website-files.com/677b8a552071e1f09b594a28/6836f65a91570332d79f23de_WM4646.webp"
+  ];
+  const collectionImage = collectionData?.cut_image || "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836d27e107b2be1f667459b_Coco%20groen%20van%20boven%207%20-%20kopie.webp";
+  const parallaxImage = collectionData?.parallax_image || "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836d2990c3d21f37b395928_Coco%20groene%20ondergrond%20(1).webp";
+  const plateImage = collectionData?.dish_image || "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836d18c0c3d21f37b38963a_Coco%20green%20plate%2026.webp";
+  const backgroundImage = collectionData?.dish_background || "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/683703bc04c2e2b84dfa13cc_francesco-ungaro-wSQdTLkVacE-unsplash.webp";
+  const dynamicBackgroundColor = collectionData?.color || "#7b8772";
+  const dynamicTextColor = collectionData?.textcolor || "#eceee9";
+  const collectionName = collectionData?.name || "Coco Green";
+  const collectionDescription = collectionData?.description || "A fusion of organic design and artisanal craftsmanship defines this porcelain collection, where nature-inspired hues seamlessly blend with modern elegance.";
+  const collectionSubDescription = collectionData?.sub_description || "In earthy moss green, the intricate patterns created by the reactive glaze ensure each piece is a unique work of art.";
+  const dishDescription = collectionData?.dish_description || "The gently speckled surface adds tactile charm, while the high rims and smooth matte finish enhance the collection's sophisticated, contemporary appeal.";
+  const productCount = collectionData?.products || firestoreProducts.length || 7;
+  const materials = collectionData?.materials || "Porcelain";
+  const colorPalette = collectionData?.color_palette || "Green";
+  
+  // Use Firebase products if available, otherwise fallback to default products
+  const products = firestoreProducts && firestoreProducts.length > 0 ? firestoreProducts : [
+    {
+      id: 1,
+      name: "Bowl ø 9",
+      image: "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836e0c3b1aeba6d47db3e90_Bowl%209-1.webp"
+    },
+    {
+      id: 2,
+      name: "Deep Plate ø 16",
+      image: "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836e05bf598be5f1ff311d7_Deep%20plate%2016-1.webp"
+    },
+    {
+      id: 3,
+      name: "Plate ø 19",
+      image: "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836dfe00c3d21f37b42b89b_Plate%2019-2.webp"
+    },
+    {
+      id: 4,
+      name: "Plate ø 20.5",
+      image: "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836e0d8473ef3c104fc90c8_Oval%20Plate%2020%2C5-2.webp"
+    },
+    {
+      id: 5,
+      name: "Bowl ø 12",
+      image: "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836e0abb1aeba6d47db2946_Bowl%2012-1.webp"
+    },
+    {
+      id: 6,
+      name: "Plate ø 14.5",
+      image: "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836e038a53cab16be969d25_Plate%2014.5-2.webp"
+    },
+    {
+      id: 7,
+      name: "Plate ø 26",
+      image: "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836dfb8985d194078df100f_Plate%2027%2C5-1.webp"
+    }
+  ];
+  
   const translateX = useSharedValue(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -112,8 +136,8 @@ export default function ElanHorizontalPager() {
 
   // 1. Hero page with full image layout (like Palmer Coco Green page)
   const HeroPage = () => (
-    <View style={styles.page}>
-      <StatusBar barStyle="light-content" backgroundColor={backgroundColor} />
+    <View style={[styles.page, { backgroundColor: dynamicBackgroundColor }]}>
+      <StatusBar barStyle="light-content" backgroundColor={dynamicBackgroundColor} />
       
       {/* Background Image */}
       <Image source={{ uri: images[currentImageIndex] }} style={styles.heroBackgroundImage} resizeMode="cover" />
@@ -122,62 +146,71 @@ export default function ElanHorizontalPager() {
       <View style={styles.heroOverlay} />
       
       {/* Fixed Elan Brand */}
-      <Text style={styles.brand}>Elan</Text>
+      <Text style={[styles.brand, { color: dynamicTextColor }]}>Elan</Text>
       
-      {/* Content Container */}
-      <View style={styles.heroContentContainer}>
-        {/* Collection Title */}
-        <Text style={styles.collectionTitle}>Coco{'\n'}Green</Text>
-        
-        {/* Description */}
-        <Text style={styles.collectionDescription}>
-          A fusion of organic design and{'\n'}
-          artisanal craftsmanship defines{'\n'}
-          this porcelain collection, where{'\n'}
-          nature-inspired hues seamlessly{'\n'}
-          blend with modern elegance.
+      {/* Collection Name in Center */}
+      <View style={styles.heroCenterContent}>
+        <Text 
+          style={[styles.heroCollectionName, { color: dynamicTextColor }]} 
+          numberOfLines={2}
+          adjustsFontSizeToFit={true}
+          minimumFontScale={0.7}
+        >
+          {collectionName}
         </Text>
-        
-        {/* Specifications */}
-        <View style={styles.heroSpecContainer}>
-          <Text style={styles.heroSpecTitle}>Specifications</Text>
-          
-          <View style={styles.heroSpecRow}>
-            <Text style={styles.heroSpecLabel}>Products</Text>
-            <Text style={styles.heroSpecValue}>7</Text>
-          </View>
-          
-          <View style={styles.heroSpecRow}>
-            <Text style={styles.heroSpecLabel}>Materials</Text>
-            <Text style={styles.heroSpecValue}>Porcelain</Text>
-          </View>
-        </View>
       </View>
       
       {/* Navigation Buttons */}
       <View style={styles.heroNavigation}>
-        <TouchableOpacity style={styles.navButton}>
-          <Text style={styles.navButtonText}>←</Text>
+        <TouchableOpacity style={[styles.navButton, { borderColor: dynamicTextColor }]} onPress={() => setCurrentImageIndex(prev => prev === 0 ? 1 : 0)}>
+          <Text style={[styles.navButtonText, { color: dynamicTextColor }]}>←</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
-          <Text style={styles.navButtonText}>→</Text>
+        <TouchableOpacity style={[styles.navButton, { borderColor: dynamicTextColor }]} onPress={() => setCurrentImageIndex(prev => prev === 0 ? 1 : 0)}>
+          <Text style={[styles.navButtonText, { color: dynamicTextColor }]}>→</Text>
         </TouchableOpacity>
       </View>
-      
-      {/* Change Image Button */}
-      <TouchableOpacity style={styles.changeImageButton} onPress={() => setCurrentImageIndex(prev => prev === 0 ? 1 : 0)}>
-        <Text style={styles.changeImageText}>Change View</Text>
-      </TouchableOpacity>
     </View>
   );
 
   // 2. Collection with large plate + description (transparent to show parallax behind)
   const CollectionPage = () => (
-    <View style={styles.transparentPage}>
-      <View style={styles.collectionLayout}>
+    <View style={[styles.transparentPage, { backgroundColor: dynamicBackgroundColor }]}>
+      <View style={[styles.collectionLayout, { backgroundColor: dynamicBackgroundColor }]}>
+        {/* Content Container */}
+        <View style={styles.heroContentContainer}>
+          {/* Collection Title */}
+          <Text style={[styles.collectionTitle, { color: dynamicTextColor }]}>{collectionName}</Text>
+          
+          {/* Description */}
+          <Text style={[styles.collectionDescription, { color: dynamicTextColor }]}>
+            {collectionDescription}
+          </Text>
+          
+          {/* Specifications */}
+          <View style={[styles.heroSpecContainer, { borderTopColor: dynamicTextColor }]}>
+            <Text style={[styles.heroSpecTitle, { color: dynamicTextColor }]}>Specifications</Text>
+            
+            <View style={[styles.heroSpecRow, { borderBottomColor: dynamicTextColor }]}>
+              <Text style={[styles.heroSpecLabel, { color: dynamicTextColor }]}>Products</Text>
+              <Text style={[styles.heroSpecValue, { color: dynamicTextColor }]}>{productCount}</Text>
+            </View>
+            
+            <View style={[styles.heroSpecRow, { borderBottomColor: dynamicTextColor }]}>
+              <Text style={[styles.heroSpecLabel, { color: dynamicTextColor }]}>Materials</Text>
+              <Text style={[styles.heroSpecValue, { color: dynamicTextColor }]}>{materials}</Text>
+            </View>
+            
+            <View style={[styles.heroSpecRow, { borderBottomColor: dynamicTextColor }]}>
+              <Text style={[styles.heroSpecLabel, { color: dynamicTextColor }]}>Color Palette</Text>
+              <Text style={[styles.heroSpecValue, { color: dynamicTextColor }]}>{colorPalette}</Text>
+            </View>
+          </View>
+        </View>
+        
         <Image source={{ uri: collectionImage }} style={styles.collectionImg} resizeMode="cover" />
+        
         <View style={styles.collectionDescBox}>
-          <Text style={styles.collectionDesc}>In earthy moss green, the intricate patterns created by the reactive glaze ensure each piece is a unique work of art.</Text>
+          <Text style={[styles.collectionDesc, { color: dynamicTextColor }]}>{collectionSubDescription}</Text>
         </View>
       </View>
     </View>
@@ -185,7 +218,7 @@ export default function ElanHorizontalPager() {
 
   // 3. Full-screen parallax image (extends behind pages 2 and 4)
   const ParallaxPage = () => (
-    <View style={styles.page}>
+    <View style={[styles.page, { backgroundColor: dynamicBackgroundColor }]}>
       <Animated.Image 
         source={{ uri: parallaxImage }} 
         style={[styles.parallaxFullImage, parallaxStyle]} 
@@ -196,11 +229,11 @@ export default function ElanHorizontalPager() {
 
   // 4. Rotating plate with background (ss14)
   const RotatingPlatePage = () => (
-    <View style={styles.page}>
+    <View style={[styles.page, { backgroundColor: dynamicBackgroundColor }]}>
       <Image source={{ uri: backgroundImage }} style={styles.bgImage} resizeMode="cover" />
       <View style={styles.plateCenterWrap}>
         <Animated.Image source={{ uri: plateImage }} style={[styles.plateImg, plateRotationStyle]} resizeMode="contain" />
-        <Text style={styles.plateDesc}>The gently speckled surface adds tactile charm, while the high rims and smooth matte finish enhance the collection’s sophisticated, contemporary appeal.</Text>
+        <Text style={[styles.plateDesc, { color: dynamicTextColor }]}>{dishDescription}</Text>
       </View>
     </View>
   );
@@ -223,55 +256,81 @@ export default function ElanHorizontalPager() {
       return { transform: [{ rotate: `${rotation}deg` }] };
     });
     
-    const renderProductItem = ({ item }: { item: typeof products[0] }) => (
-      <View style={[styles.productCard, { width: itemWidth }]}>
-        <TouchableOpacity style={styles.productTouchable}>
-          <View style={[styles.productImageContainer, { height: itemWidth * 0.8 }]}>
-            <Animated.Image 
-              source={{ uri: item.image }} 
-              style={[styles.productImg, { width: itemWidth * 0.7, height: itemWidth * 0.7 }, productRotationStyle]} 
-              resizeMode="cover" 
-            />
-          </View>
-          <Text style={styles.productName} numberOfLines={2}>{item.name}</Text>
-        </TouchableOpacity>
-      </View>
-    );
+    const renderProductItem = ({ item, index }: { item: any, index: number }) => {
+      const handleProductPress = () => {
+        router.push({
+          pathname: '/miami-products',
+          params: { collectionId: collectionId.toString() }
+        });
+      };
+
+      return (
+        <View style={[styles.productCard, { width: itemWidth }]}>
+          <TouchableOpacity 
+            style={styles.productTouchable}
+            onPress={handleProductPress}
+          >
+            <View style={[styles.productImageContainer, { height: itemWidth * 0.8, backgroundColor: dynamicBackgroundColor }]}>
+              <Animated.Image 
+                source={{ uri: item.main_image || item.image }} 
+                style={[styles.productImg, { width: itemWidth * 0.7, height: itemWidth * 0.7 }, productRotationStyle]} 
+                resizeMode="cover" 
+              />
+            </View>
+            <Text style={[styles.productName, { color: dynamicTextColor }]} numberOfLines={2}>
+              {item.product_name || item.name}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      );
+    };
 
     const renderHeader = () => (
       <View style={styles.productsHeaderContainer}>
-        <Text style={styles.productsTitle}>Products from{'\n'}this collection</Text>
-        <Text style={styles.productCount}>{products.length} products</Text>
+        <Text style={[styles.productsTitle, { color: dynamicTextColor }]}>Products from{'\n'}this collection</Text>
+        <Text style={[styles.productCount, { color: dynamicTextColor }]}>{products.length} products</Text>
       </View>
     );
 
     return (
-      <View style={styles.page}>
-        <FlatList
-          data={products}
-          renderItem={renderProductItem}
-          numColumns={numColumns}
-          ListHeaderComponent={renderHeader}
-          columnWrapperStyle={numColumns > 1 ? styles.gridRow : undefined}
-          contentContainerStyle={styles.gridContainer}
-          showsVerticalScrollIndicator={false}
-          keyExtractor={(item) => item.id.toString()}
-        />
+      <View style={[styles.page, { backgroundColor: dynamicBackgroundColor }]}>
+        {productsLoading ? (
+          <View style={styles.loadingContainer}>
+            <Text style={[styles.loadingText, { color: dynamicTextColor }]}>Loading products...</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={products}
+            renderItem={renderProductItem}
+            numColumns={numColumns}
+            ListHeaderComponent={renderHeader}
+            columnWrapperStyle={numColumns > 1 ? styles.gridRow : undefined}
+            contentContainerStyle={styles.gridContainer}
+            showsVerticalScrollIndicator={false}
+            keyExtractor={(item, index) => item.id?.toString() || index.toString()}
+          />
+        )}
       </View>
     );
   };
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <GestureDetector gesture={horizontalSwipe}>
-        <Animated.View style={[styles.container, animatedStyle]}>
-          <HeroPage />
-          <CollectionPage />
-          <ParallaxPage />
-          <RotatingPlatePage />
-          <ProductsPage />
-        </Animated.View>
-      </GestureDetector>
+      {collectionLoading || productsLoading ? (
+        <View style={[styles.loadingContainer, { backgroundColor: dynamicBackgroundColor }]}>
+          <Text style={[styles.loadingText, { color: dynamicTextColor }]}>Loading collection...</Text>
+        </View>
+      ) : (
+        <GestureDetector gesture={horizontalSwipe}>
+          <Animated.View style={[styles.container, animatedStyle]}>
+            <HeroPage />
+            <CollectionPage />
+            <ParallaxPage />
+            <RotatingPlatePage />
+            <ProductsPage />
+          </Animated.View>
+        </GestureDetector>
+      )}
     </GestureHandlerRootView>
   );
 }
@@ -288,16 +347,16 @@ const styles = StyleSheet.create({
   page: {
     width,
     height: "100%",
-    backgroundColor: backgroundColor,
+    // backgroundColor: backgroundColor,
   },
   transparentPage: {
     width,
     height: "100%",
-    backgroundColor: backgroundColor,
+    // backgroundColor: backgroundColor,
   },
   brand: {
     fontSize: 36,
-    color: textColor,
+    // color: textColor,
     fontWeight: "bold",
     marginTop: 48,
     marginLeft: 24,
@@ -318,35 +377,52 @@ const styles = StyleSheet.create({
     height: "100%",
     backgroundColor: "rgba(123,135,114,0.4)",
   },
-  heroContentContainer: {
+  heroCenterContent: {
     position: "absolute",
-    right: 20,
-    top: "35%",
-    width: width * 0.5,
+    top: "50%",
+    left: "50%",
+    transform: [{ translateX: -width * 0.4 }, { translateY: -40 }],
+    zIndex: 10,
+    alignItems: "center",
+    width: width * 0.8,
+    maxWidth: width * 0.8,
+  },
+  heroCollectionName: {
+    fontSize: 48,
+    fontWeight: "bold",
+    textAlign: "center",
+    letterSpacing: 2,
+    lineHeight: 52,
+  },
+  heroContentContainer: {
+    position: "relative",
+    width: width * 0.8,
     zIndex: 5,
     paddingHorizontal: 15,
+    paddingTop: 28,
+    marginBottom: 20,
   },
   collectionTitle: {
     fontSize: 48,
-    color: textColor,
+    // color: textColor,
     fontWeight: "bold",
     marginBottom: 20,
     lineHeight: 52,
   },
   collectionDescription: {
     fontSize: 14,
-    color: textColor,
+    // color: textColor,
     lineHeight: 20,
     marginBottom: 30,
   },
   heroSpecContainer: {
     borderTopWidth: 1,
-    borderTopColor: textColor,
+    // borderTopColor: textColor,
     paddingTop: 15,
   },
   heroSpecTitle: {
     fontSize: 16,
-    color: textColor,
+    // color: textColor,
     fontWeight: "600",
     marginBottom: 15,
   },
@@ -357,16 +433,16 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     paddingBottom: 6,
     borderBottomWidth: 0.5,
-    borderBottomColor: textColor,
+    // borderBottomColor: textColor,
   },
   heroSpecLabel: {
     fontSize: 12,
-    color: textColor,
+    // color: textColor,
     opacity: 0.8,
   },
   heroSpecValue: {
     fontSize: 12,
-    color: textColor,
+    // color: textColor,
     fontWeight: "600",
   },
   heroNavigation: {
@@ -381,14 +457,14 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderWidth: 1,
-    borderColor: textColor,
+    // borderColor: textColor,
     borderRadius: 4,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(123,135,114,0.1)",
   },
   navButtonText: {
-    color: textColor,
+    // color: textColor,
     fontSize: 18,
     fontWeight: "bold",
   },
@@ -403,7 +479,7 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   changeImageText: {
-    color: textColor,
+    // color: textColor,
     fontSize: 14,
     fontWeight: "bold",
   },
@@ -412,7 +488,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     paddingLeft: 24,
     paddingTop: 10,
-    backgroundColor: backgroundColor,
+    // backgroundColor: backgroundColor,
   },
   heroImagesRow: {
     flexDirection: "row",
@@ -423,7 +499,7 @@ const styles = StyleSheet.create({
   heroImage: {
     width: width * 0.45,
     height: height * 0.3,
-    backgroundColor: backgroundColor,
+    // backgroundColor: backgroundColor,
     borderRadius: 16,
     marginRight: 18
   },
@@ -441,7 +517,7 @@ const styles = StyleSheet.create({
   },
   productsHeader: {
     fontSize: 34,
-    color: textColor,
+    // color: textColor,
     fontWeight: "bold",
     marginTop: 42,
     textAlign: "left",
@@ -450,27 +526,27 @@ const styles = StyleSheet.create({
   // Collection page
   collectionLayout: {
     flex: 1,
-    flexDirection: "row",
+    flexDirection: "column",
     padding: 20,
     alignItems: "center",
-    backgroundColor: backgroundColor, // Semi-transparent background
+    // backgroundColor: backgroundColor, // Semi-transparent background
     zIndex: 2, // Above parallax image
   },
   collectionImg: {
-    width: width * 0.43,
-    height: height * 0.53,
+    width: width * 0.8,
+    height: height * 0.4,
     borderRadius: 14,
-    marginRight: 18,
+    marginBottom: 20,
   },
   collectionDescBox: {
-    flex: 1,
+    width: width * 0.8,
     justifyContent: "center",
-    alignItems: "flex-start",
+    alignItems: "center",
     paddingHorizontal: 7,
   },
   collectionDesc: {
     fontSize: 18,
-    color: textColor,
+    // color: textColor,
     marginBottom: 10,
   },
   // Full-screen parallax image
@@ -499,7 +575,7 @@ const styles = StyleSheet.create({
     height: width * 0.64,
     marginBottom: 34,
     borderRadius: width * 0.32,
-    backgroundColor: backgroundColor,
+    // backgroundColor: backgroundColor,
     shadowColor: "#222",
     shadowOffset: { width: 4, height: 12 },
     shadowOpacity: 0.11,
@@ -507,7 +583,7 @@ const styles = StyleSheet.create({
   },
   plateDesc: {
     fontSize: 16,
-    color: textColor,
+    // color: textColor,
     textAlign: "center",
     lineHeight: 25,
     marginTop: 15,
@@ -522,14 +598,14 @@ const styles = StyleSheet.create({
   },
   productsTitle: {
     fontSize: 34,
-    color: textColor,
+    // color: textColor,
     fontWeight: "bold",
     lineHeight: 40,
     marginBottom: 10,
   },
   productCount: {
     fontSize: 16,
-    color: textColor,
+    // color: textColor,
     opacity: 0.8,
   },
   gridContainer: {
@@ -541,7 +617,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   productCard: {
-    backgroundColor: backgroundColor,
+    // backgroundColor: backgroundColor,
     // Width is now set dynamically in component
   },
   productTouchable: {
@@ -552,7 +628,7 @@ const styles = StyleSheet.create({
     // Height is now set dynamically in component
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: backgroundColor,
+    // backgroundColor: backgroundColor,
     borderRadius: 16,
     borderWidth: 1.2,
     borderColor: "#eceee97d",
@@ -567,10 +643,19 @@ const styles = StyleSheet.create({
     // Width and height are now set dynamically in component
   },
   productName: {
-    color: textColor,
+    // color: textColor,
     fontWeight: "bold",
     fontSize: 13, // Slightly smaller for 3 columns
     textAlign: "center",
     paddingHorizontal: 4,
-  }
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
 });

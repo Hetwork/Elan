@@ -2,6 +2,7 @@ import '../global.css';
 
 import { Stack } from 'expo-router';
 import QueryProvider from '../utils/providers/QueryProvider';
+import { useEffect } from 'react';
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
@@ -9,6 +10,11 @@ export const unstable_settings = {
 };
 
 export default function RootLayout() {
+  useEffect(() => {
+    // Initialize Firebase after component mounts
+    import('../utils/firebase');
+  }, []);
+
   return (
     <QueryProvider>
       <Stack>
@@ -19,6 +25,7 @@ export default function RootLayout() {
         <Stack.Screen name="test" options={{ headerShown: false }} />
         <Stack.Screen name="detail" options={{ headerShown: false }} />
         <Stack.Screen name="miami-products" options={{ headerShown: false }} />
+        <Stack.Screen name="contact" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
       </Stack>
     </QueryProvider>

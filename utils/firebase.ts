@@ -1,53 +1,126 @@
-import { initializeApp, getApps } from 'firebase/app';
-import { getAuth, initializeAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
-import { getDatabase } from 'firebase/database';
 import { Platform } from 'react-native';
 
-// Initialize Firebase
-const firebaseConfig = {
-  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  databaseURL: process.env.EXPO_PUBLIC_FIREBASE_DATABASE_URL,
-  projectId: process.env.EXPO_PUBLIC_PROJECT_ID,
-  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID,
-};
+let app: any,
+  firestore: any,
+  auth: any,
+  db: any,
+  collection: any,
+  deleteDoc: any,
+  doc: any,
+  getDoc: any,
+  getDocs: any,
+  query: any,
+  setDoc: any,
+  updateDoc: any,
+  addDoc: any,
+  where: any,
+  serverTimestamp: any,
+  arrayUnion: any,
+  arrayRemove: any,
+  onSnapshot: any,
+  Timestamp: any,
+  getCountFromServer: any;
 
-// Initialize Firebase App
-let firebase;
-if (getApps().length === 0) {
-  firebase = initializeApp(firebaseConfig);
+if (Platform.OS === 'web') {
+  // Web Firebase imports
+  firestore = require('firebase/firestore');
+  collection = firestore.collection;
+  deleteDoc = firestore.deleteDoc;
+  doc = firestore.doc;
+  getDoc = firestore.getDoc;
+  getDocs = firestore.getDocs;
+  query = firestore.query;
+  setDoc = firestore.setDoc;
+  updateDoc = firestore.updateDoc;
+  addDoc = firestore.addDoc;
+  where = firestore.where;
+  serverTimestamp = firestore.serverTimestamp;
+  arrayUnion = firestore.arrayUnion;
+  arrayRemove = firestore.arrayRemove;
+  onSnapshot = firestore.onSnapshot;
+  Timestamp = firestore.Timestamp;
+  getCountFromServer = firestore.getCountFromServer;
 } else {
-  firebase = getApps()[0];
+  // React Native Firebase imports
+  firestore = require('@react-native-firebase/firestore');
+  collection = firestore.collection;
+  deleteDoc = firestore.deleteDoc;
+  doc = firestore.doc;
+  getDoc = firestore.getDoc;
+  getDocs = firestore.getDocs;
+  query = firestore.query;
+  setDoc = firestore.setDoc;
+  updateDoc = firestore.updateDoc;
+  addDoc = firestore.addDoc;
+  where = firestore.where;
+  serverTimestamp = firestore.serverTimestamp;
+  arrayUnion = firestore.arrayUnion;
+  arrayRemove = firestore.arrayRemove;
+  onSnapshot = firestore.onSnapshot;
+  Timestamp = firestore.Timestamp;
+  getCountFromServer = firestore.getCountFromServer;
 }
 
-// Initialize Firebase Auth
-let auth;
-try {
-  // For React Native, we use initializeAuth for better persistence
-  if (Platform.OS === 'android' || Platform.OS === 'ios') {
-    auth = initializeAuth(firebase);
+if (Platform.OS === 'web') {
+  // Web Firebase configuration
+  const { initializeApp, getApps, getApp } = require('firebase/app');
+  const { getAuth } = require('firebase/auth');
+  const { getFirestore } = require('firebase/firestore');
+
+  // Your Firebase web config
+  const firebaseConfig = {
+    apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.EXPO_PUBLIC_PROJECT_ID,
+    storageBucket: process.env.EXPO_PUBLIC_STORAGE_BUCKET,
+    messagingSenderId: process.env.EXPO_PUBLIC_MESSAGING_SENDER_ID,
+    appId: process.env.EXPO_PUBLIC_APP_ID,
+    measurementId: process.env.EXPO_PUBLIC_MEASUREMENT_ID,
+  };
+  // Initialize Firebase App for web
+  if (getApps().length === 0) {
+    console.log('Initializing Firebase app for web');
+    app = initializeApp(firebaseConfig);
+    console.log('Firebase app initialized for web');
   } else {
-    auth = getAuth(firebase);
+    app = getApp();
+    console.log('Using existing Firebase app for web');
   }
-} catch (error) {
-  // If auth is already initialized, get the existing instance
-  auth = getAuth(firebase);
+
+  auth = getAuth(app);
+  db = getFirestore(app);
+} else {
+  // React Native Firebase configuration
+  console.log('Using React Native Firebase');
+
+  // Import and use default instances
+  const authDefault = require('@react-native-firebase/auth').default;
+  const firestoreDefault = require('@react-native-firebase/firestore').default;
+  
+  auth = authDefault();
+  db = firestoreDefault();
 }
 
-// Initialize Firestore
-const db = getFirestore(firebase);
-
-// Initialize Firebase Storage
-const storage = getStorage(firebase);
-
-// Initialize Realtime Database
-const database = getDatabase(firebase);
-
-// Export Firebase services
-export { auth, db, storage, database };
-export default firebase;
+console.log('Firebase auth ready');
+export {
+  app,
+  auth,
+  db,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  setDoc,
+  updateDoc,
+  addDoc,
+  where,
+  serverTimestamp,
+  arrayUnion,
+  arrayRemove,
+  onSnapshot,
+  Timestamp,
+  getCountFromServer,
+  firestore,
+};

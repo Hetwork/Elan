@@ -358,7 +358,7 @@ export default function App() {
                   setIsFilterVisible(false);
                 }}>
                 <View style={styles.filterIconContainer}>
-                  <AntDesign name="close" size={14} color="#666" />
+                  <AntDesign name="retweet" size={14} color="#333s" />
                 </View>
               </TouchableOpacity>
             </View>

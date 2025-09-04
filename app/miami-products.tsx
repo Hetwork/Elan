@@ -73,16 +73,6 @@ export default function MiamiProducts() {
     },
   });
 
-  // Animated border position based on scroll position
-  const animatedBorderStyle = useAnimatedStyle(() => {
-    const scrollIndex = Math.min(scrollY.value / height, products.length - 1);
-    const translateY = scrollIndex * 65; // 65 = thumbnail height (50) + margin (15)
-
-    return {
-      transform: [{ translateY }],
-    };
-  });
-
   const getCurrentProduct = () => products[currentIndex] || products[0];
 
   // ✅ UI states handled inside return
@@ -112,7 +102,9 @@ export default function MiamiProducts() {
         {/* Left thumbnails */}
         <View style={styles.leftContent}>
           <Text style={styles.elanText}>Elan</Text>
-          <Text style={styles.miamiTitle}>Miami</Text>
+          <Text style={styles.miamiTitle} numberOfLines={3} ellipsizeMode="tail">
+            {products[0].collection_name}
+          </Text>
 
           <View style={styles.thumbnailsContainer}>
             {products.map((product, index) => (
@@ -121,8 +113,6 @@ export default function MiamiProducts() {
               </TouchableOpacity>
             ))}
           </View>
-
-          <Animated.View style={[styles.animatedBorder, animatedBorderStyle]} />
         </View>
 
         {/* Center scroll images */}
@@ -182,6 +172,8 @@ const styles = StyleSheet.create({
     letterSpacing: -3,
     lineHeight: 80,
     marginBottom: 20,
+    width: width * 0.9, // Limit width to prevent overflow
+    flexWrap: 'wrap',
   },
 
   thumbnailsContainer: { flexDirection: 'column' },
@@ -195,16 +187,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   thumbnail: { width: '100%', height: '100%' },
-  animatedBorder: {
-    position: 'absolute',
-    left: -2,
-    top: 130, // Starting position aligned with first thumbnail
-    width: 54,
-    height: 54,
-    borderWidth: 2,
-    borderColor: '#333',
-    borderRadius: 10,
-  },
 
   centerImageContainer: {
     flex: 1,

@@ -10,6 +10,7 @@ export interface Product {
   size: string;
   product_type: string;
   collection_id: number;
+  collection_name: string;
 }
 
 /**

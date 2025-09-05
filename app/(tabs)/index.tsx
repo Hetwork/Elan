@@ -21,6 +21,9 @@ export default function Home() {
         <TouchableOpacity style={{ padding: 20, backgroundColor: '#ccc', borderRadius: 5 }} onPress={() => router.push('/horizontal')}>
           <Text>Scroll</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={{ padding: 20, backgroundColor: '#ccc', borderRadius: 5 }} onPress={() => router.push('/Cart')}>
+          <Text>Cart</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={{ padding: 20, backgroundColor: '#ccc', borderRadius: 5 }} onPress={() => router.push('/test')}>
           <Text>Open Test Screen</Text>
         </TouchableOpacity>

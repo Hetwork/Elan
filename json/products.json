@@ -7,7 +7,8 @@
     "size": "28",
     "product_type": "Plate",
     "collection_id": 5,
-    "collection_name": "Antigo Blue"
+    "collection_name": "Antigo Blue",
+    "price": 950
   },
   {
     "id": 3,
@@ -17,7 +18,8 @@
     "size": "15",
     "product_type": "Bowl",
     "collection_id": 5,
-    "collection_name": "Antigo Blue"
+    "collection_name": "Antigo Blue",
+    "price": 420
   },
   {
     "id": 4,
@@ -27,7 +29,8 @@
     "size": "19",
     "product_type": "Plate",
     "collection_id": 5,
-    "collection_name": "Antigo Blue"
+    "collection_name": "Antigo Blue",
+    "price": 680
   },
   {
     "id": 5,
@@ -37,7 +40,8 @@
     "size": "19",
     "product_type": "Deep Plate",
     "collection_id": 5,
-    "collection_name": "Antigo Blue"
+    "collection_name": "Antigo Blue",
+    "price": 750
   },
   {
     "id": 6,
@@ -47,7 +51,8 @@
     "size": "28",
     "product_type": "Plate",
     "collection_id": 2,
-    "collection_name": "Jory"
+    "collection_name": "Jory",
+    "price": 930
   },
   {
     "id": 7,
@@ -57,7 +62,8 @@
     "size": "22",
     "product_type": "Plate",
     "collection_id": 2,
-    "collection_name": "Jory"
+    "collection_name": "Jory",
+    "price": 720
   },
   {
     "id": 8,
@@ -67,7 +73,8 @@
     "size": "22",
     "product_type": "Deep Plate",
     "collection_id": 2,
-    "collection_name": "Jory"
+    "collection_name": "Jory",
+    "price": 790
   },
   {
     "id": 9,
@@ -77,7 +84,8 @@
     "size": "27",
     "product_type": "Plate",
     "collection_id": 2,
-    "collection_name": "Jory"
+    "collection_name": "Jory",
+    "price": 890
   },
   {
     "id": 10,
@@ -87,7 +95,8 @@
     "size": "16",
     "product_type": "Bowl",
     "collection_id": 2,
-    "collection_name": "Jory"
+    "collection_name": "Jory",
+    "price": 450
   },
   {
     "id": 11,
@@ -97,7 +106,8 @@
     "size": "22",
     "product_type": "Deep Plate",
     "collection_id": 3,
-    "collection_name": "Miami"
+    "collection_name": "Miami",
+    "price": 810
   },
   {
     "id": 12,
@@ -107,7 +117,8 @@
     "size": "8",
     "product_type": "Cup",
     "collection_id": 3,
-    "collection_name": "Miami"
+    "collection_name": "Miami",
+    "price": 300
   },
   {
     "id": 13,
@@ -117,7 +128,8 @@
     "size": "12",
     "product_type": "Bowl",
     "collection_id": 3,
-    "collection_name": "Miami"
+    "collection_name": "Miami",
+    "price": 400
   },
   {
     "id": 14,
@@ -127,7 +139,8 @@
     "size": "22",
     "product_type": "Plate",
     "collection_id": 3,
-    "collection_name": "Miami"
+    "collection_name": "Miami",
+    "price": 730
   },
   {
     "id": 15,
@@ -137,7 +150,8 @@
     "size": "16",
     "product_type": "Bowl",
     "collection_id": 3,
-    "collection_name": "Miami"
+    "collection_name": "Miami",
+    "price": 460
   },
   {
     "id": 16,
@@ -147,7 +161,8 @@
     "size": "27",
     "product_type": "Plate",
     "collection_id": 3,
-    "collection_name": "Miami"
+    "collection_name": "Miami",
+    "price": 880
   },
   {
     "id": 17,
@@ -157,7 +172,8 @@
     "size": "11.5",
     "product_type": "Saucer",
     "collection_id": 3,
-    "collection_name": "Miami"
+    "collection_name": "Miami",
+    "price": 280
   },
   {
     "id": 18,
@@ -167,7 +183,8 @@
     "size": "21",
     "product_type": "Cup",
     "collection_id": 3,
-    "collection_name": "Miami"
+    "collection_name": "Miami",
+    "price": 340
   },
   {
     "id": 19,
@@ -177,7 +194,8 @@
     "size": "28",
     "product_type": "Plate",
     "collection_id": 3,
-    "collection_name": "Miami"
+    "collection_name": "Miami",
+    "price": 940
   },
   {
     "id": 20,
@@ -187,7 +205,8 @@
     "size": "14",
     "product_type": "Saucer",
     "collection_id": 3,
-    "collection_name": "Miami"
+    "collection_name": "Miami",
+    "price": 320
   },
   {
     "id": 21,
@@ -197,7 +216,8 @@
     "size": "19",
     "product_type": "Cup",
     "collection_id": 3,
-    "collection_name": "Miami"
+    "collection_name": "Miami",
+    "price": 180
   },
   {
     "id": 22,
@@ -207,7 +227,8 @@
     "size": "22",
     "product_type": "Plate",
     "collection_id": 4,
-    "collection_name": "Barolo"
+    "collection_name": "Barolo",
+    "price": 260
   },
   {
     "id": 23,
@@ -217,7 +238,8 @@
     "size": "28",
     "product_type": "Plate",
     "collection_id": 4,
-    "collection_name": "Barolo"
+    "collection_name": "Barolo",
+    "price": 340
   },
   {
     "id": 24,
@@ -227,7 +249,8 @@
     "size": "29",
     "product_type": "Deep Plate",
     "collection_id": 4,
-    "collection_name": "Barolo"
+    "collection_name": "Barolo",
+    "price": 360
   },
   {
     "id": 25,
@@ -237,7 +260,8 @@
     "size": "16",
     "product_type": "Bowl",
     "collection_id": 4,
-    "collection_name": "Barolo"
+    "collection_name": "Barolo",
+    "price": 220
   },
   {
     "id": 26,
@@ -247,7 +271,8 @@
     "size": "7",
     "product_type": "Cup",
     "collection_id": 4,
-    "collection_name": "Barolo"
+    "collection_name": "Barolo",
+    "price": 90
   },
   {
     "id": 27,
@@ -257,7 +282,8 @@
     "size": "21",
     "product_type": "Cup",
     "collection_id": 4,
-    "collection_name": "Barolo"
+    "collection_name": "Barolo",
+    "price": 190
   },
   {
     "id": 28,
@@ -267,7 +293,8 @@
     "size": "29",
     "product_type": "Cup",
     "collection_id": 4,
-    "collection_name": "Barolo"
+    "collection_name": "Barolo",
+    "price": 200
   },
   {
     "id": 30,
@@ -277,7 +304,8 @@
     "size": "22",
     "product_type": "Plate",
     "collection_id": 1,
-    "collection_name": "Sandy Loam Grey"
+    "collection_name": "Sandy Loam Grey",
+    "price": 250
   },
   {
     "id": 31,
@@ -287,7 +315,8 @@
     "size": "22",
     "product_type": "Plate",
     "collection_id": 1,
-    "collection_name": "Sandy Loam Grey"
+    "collection_name": "Sandy Loam Grey",
+    "price": 270
   },
   {
     "id": 32,
@@ -297,7 +326,8 @@
     "size": "28",
     "product_type": "Plate",
     "collection_id": 1,
-    "collection_name": "Sandy Loam Grey"
+    "collection_name": "Sandy Loam Grey",
+    "price": 340
   },
   {
     "id": 33,
@@ -307,7 +337,8 @@
     "size": "16",
     "product_type": "Bowl",
     "collection_id": 1,
-    "collection_name": "Sandy Loam Grey"
+    "collection_name": "Sandy Loam Grey",
+    "price": 210
   },
   {
     "id": 34,
@@ -317,7 +348,8 @@
     "size": "20.5",
     "product_type": "Plate",
     "collection_id": 6,
-    "collection_name": "Coco Blue"
+    "collection_name": "Coco Blue",
+    "price": 240
   },
   {
     "id": 35,
@@ -327,7 +359,8 @@
     "size": "9",
     "product_type": "Bowl",
     "collection_id": 6,
-    "collection_name": "Coco Blue"
+    "collection_name": "Coco Blue",
+    "price": 120
   },
   {
     "id": 36,
@@ -337,49 +370,51 @@
     "size": "12",
     "product_type": "Bowl",
     "collection_id": 6,
-    "collection_name": "Coco Blue"
+    "collection_name": "Coco Blue",
+    "price": 150
   },
-  
-{
-  "id": 37,
-  "name": "Coco Blue Deep Plate 16",
-  "image": "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836da17f598be5f1ff00aa5_Deep%20plate%2016.webp",
-  "color": "Blue",
-  "size": "16",
-  "product_type": "Plate",
-  "collection_id": 6,
-"collection_name": "Coco Blue"
-},
-{
-  "id": 38,
-  "name": "Coco Blue Plate 14.5",
-  "image": "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836d9d62b420583d79b583a_Plate%2014.5.webp",
-  "color": "Blue",
-  "size": "14.5",
-  "product_type": "Plate",
-  "collection_id": 6,
-"collection_name": "Coco Blue"
-},
-{
-  "id": 39,
-  "name": "Coco Blue Plate 19",
-  "image": "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836d99d73361f5d3c976935_Plate%2019.webp",
-  "color": "Blue",
-  "size": "19",
-  "product_type": "Plate",
-  "collection_id": 6,
-"collection_name": "Coco Blue"
-},
-{
-  "id": 40,
-  "name": "Coco Blue Plate 26",
-  "image": "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836cb8ee9c1eb5d19bea65c_Coco%20plate%2026.webp",
-  "color": "Blue",
-  "size": "26",
-  "product_type": "Plate",
-  "collection_id": 6,
-"collection_name": "Coco Blue"
-}
+  {
+    "id": 37,
+    "name": "Coco Blue Deep Plate 16",
+    "image": "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836da17f598be5f1ff00aa5_Deep%20plate%2016.webp",
+    "color": "Blue",
+    "size": "16",
+    "product_type": "Plate",
+    "collection_id": 6,
+    "collection_name": "Coco Blue",
+    "price": 200
+  },
+  {
+    "id": 38,
+    "name": "Coco Blue Plate 14.5",
+    "image": "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836d9d62b420583d79b583a_Plate%2014.5.webp",
+    "color": "Blue",
+    "size": "14.5",
+    "product_type": "Plate",
+    "collection_id": 6,
+    "collection_name": "Coco Blue",
+    "price": 180
+  },
+  {
+    "id": 39,
+    "name": "Coco Blue Plate 19",
+    "image": "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836d99d73361f5d3c976935_Plate%2019.webp",
+    "color": "Blue",
+    "size": "19",
+    "product_type": "Plate",
+    "collection_id": 6,
+    "collection_name": "Coco Blue",
+    "price": 230
+  },
+  {
+    "id": 40,
+    "name": "Coco Blue Plate 26",
+    "image": "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836cb8ee9c1eb5d19bea65c_Coco%20plate%2026.webp",
+    "color": "Blue",
+    "size": "26",
+    "product_type": "Plate",
+    "collection_id": 6,
+    "collection_name": "Coco Blue",
+    "price": 320
+  }
 ]
-
-  

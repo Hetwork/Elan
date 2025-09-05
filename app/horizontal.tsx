@@ -18,8 +18,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useGetProductsByCollectionIdFromFirestore } from '../utils/Hooks/ProductsHook';
-import { useGetCollectionByIdFromFirestore } from '../utils/Hooks/collectionHook';
+import { useGetProductsByCollectionIdFromFirestore } from '../firebase/Hooks/ProductsHook';
+import { useGetCollectionByIdFromFirestore } from '../firebase/Hooks/collectionHook';
 
 const { width, height } = Dimensions.get("window");
 

@@ -4,6 +4,7 @@
     "name": "Sandy Loam Grey",
     "color": "#bb5c60",
     "textcolor": "#EFEEF0",
+    "price": 3200,
     "main_image": [
       "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/67e68d674159fca0e53d0105_667c21e150e3a870ae17d98a_Palmer_Sandy_Loam_grey_sfeer_beauty_shot.webp",
       "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/67e67bf2ec2228c421ceecbc_667c21d6d1a0e2c283cd4db8_Palmer_Sandy_Loam_grey_sfeer_key_visual_1.webp"
@@ -24,6 +25,7 @@
     "name": "Jory",
     "color": "#bacdf3",
     "textcolor": "#041147",
+    "price": 4200,
     "main_image": [
       "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/67ea5896b9e356559e8d17c4_66461e90664aeb6079c34031_Palmer_Jory_sfeer_beautyshot.webp",
       "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/67ea58a8567ca521a07c1045_jory-img-l.webp"
@@ -44,6 +46,7 @@
     "name": "Miami",
     "color": "#b4c4c6",
     "textcolor": "#152443",
+    "price": 5500,
     "main_image": ["https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/67e6b57ac2bb02abf1a994d0_66447e979b557a23bba44455_Palmer_Miami_sfeer_beautyshot_1.webp", "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/67e6b65decf40acc10e2431f_Frame%20143.webp"],
     "description": "The refreshing aquatic colouring on this stoneware collection is as inviting as the ocean on a summer’s day.",
     "products": 11,
@@ -61,6 +64,7 @@
     "name": "Barolo",
     "color": "#e0bdc1",
     "textcolor": "#313d4d",
+    "price": 4800,
     "main_image": ["https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/67ea7f20926dcf9cfb5b72f6_6656d233a54ca5e3e26e4e6d_Palmer_Barolo_sfeer_beautyshot.webp", "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/67ea7f347cbdd3b77eaca77e_barolo-img-l.webp"],
     "description": "Soft rustic shapes in a gentle, refreshing blue with tantalising hints of warm beige inspire cosy times.",
     "products": 7,
@@ -78,6 +82,7 @@
     "name": "Antigo Blue",
     "color": "#f5cd88",
     "textcolor": "#351f12",
+    "price": 5200,
     "main_image": [
       "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/67ea6633517bb9c783e5f54b_6675754b9041afa82d0438f6_Palmer_Antigo_Blue_sfeer_beautyshot.webp",
       "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/67ea6653bd902f002325d61a_antigo-blue-img-l.webp"
@@ -98,6 +103,7 @@
     "name": "Coco Blue",
     "color": "#da87a6",
     "textcolor": "#222",
+    "price": 3800,
     "main_image": ["https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836c8fea08b852c8ca9672e_Coco%20roze%20ondergrond%20Beautyshot%20-%20kopie.webp", "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836ca0209abadb2a9accb05_Coco%20op%20Roze%20totaal%20(1).webp"],
     "description": "A fusion of organic design and artisanal craftsmanship defines this porcelain collection, where nature-inspired hues seamlessly blend with modern elegance.",
     "products": 7,

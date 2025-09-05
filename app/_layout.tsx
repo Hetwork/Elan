@@ -1,7 +1,7 @@
 import '../global.css';
 
 import { Stack } from 'expo-router';
-import QueryProvider from '../utils/providers/QueryProvider';
+import QueryProvider from '../firebase/providers/QueryProvider';
 import { useEffect } from 'react';
 
 export const unstable_settings = {
@@ -12,7 +12,7 @@ export const unstable_settings = {
 export default function RootLayout() {
   useEffect(() => {
     // Initialize Firebase after component mounts
-    import('../utils/firebase');
+    import('../firebase/firebase');
   }, []);
 
   return (
@@ -26,6 +26,9 @@ export default function RootLayout() {
         <Stack.Screen name="detail" options={{ headerShown: false }} />
         <Stack.Screen name="miami-products" options={{ headerShown: false }} />
         <Stack.Screen name="contact" options={{ headerShown: false }} />
+        <Stack.Screen name="Cart" options={{ headerShown: false }} />
+        <Stack.Screen name="About" options={{ headerShown: false }} />
+        <Stack.Screen name="profile" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
       </Stack>
     </QueryProvider>

@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { useGetProductsByCollectionIdFromFirestore } from '../utils/Hooks/ProductsHook';
+import { useGetProductsByCollectionIdFromFirestore } from '../firebase/Hooks/ProductsHook';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,

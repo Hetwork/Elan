@@ -12,9 +12,10 @@ import {
 import { FontAwesome, Fontisto, AntDesign, Feather } from '@expo/vector-icons';
 import ExperienceView from '../components/ExperienceView';
 import GridView from '../components/GridView';
-import { useGetAllProducts } from '../utils/Hooks/ProductsHook';
-import { useGetAllCollections } from '../utils/Hooks/collectionHook';
+import { useGetAllProducts } from '../firebase/Hooks/ProductsHook';
+import { useGetAllCollections } from '../firebase/Hooks/collectionHook';
 import { router } from 'expo-router';
+import { AuthModal } from '../components/Auth';
 
 const { width } = Dimensions.get('window');
 
@@ -26,7 +27,15 @@ export default function App() {
   const [isTypePaletteVisible, setIsTypePaletteVisible] = useState(false);
   const [isSizePaletteVisible, setIsSizePaletteVisible] = useState(false);
   const [sizeRange, setSizeRange] = useState({ min: 6, max: 29 });
+  const [isAuthModalVisible, setIsAuthModalVisible] = useState(false);
   
+    const handleAuthSuccess = () => {
+      console.log('User authenticated successfully!');
+      // Handle successful authentication here
+      // e.g., navigate to main app, update app state, etc.
+    };
+
+
   // Filter states
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string | null>(null);
@@ -283,10 +292,9 @@ export default function App() {
               style={styles.menuItem}
               onPress={() => {
                 toggleMenu();
-                alert('Collections pressed');
+                router.push('/Cart');
               }}>
-              <View style={styles.menuDot} />
-              <Text style={styles.menuItemText}>collections</Text>
+              <Text style={[styles.menuItemText, styles.menuItemTextIndent]}>Cart</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.menuItemView}>
@@ -294,7 +302,17 @@ export default function App() {
               style={styles.menuItem}
               onPress={() => {
                 toggleMenu();
-                alert('About pressed');
+                router.push('/profile');
+              }}>
+              <Text style={[styles.menuItemText, styles.menuItemTextIndent]}>Profile</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.menuItemView}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                toggleMenu();
+                router.push('/About');
               }}>
               <Text style={[styles.menuItemText, styles.menuItemTextIndent]}>about</Text>
             </TouchableOpacity>
@@ -549,6 +567,13 @@ export default function App() {
           </View>
         </View>
       )}
+
+      {/* Authentication Modal */}
+      <AuthModal
+              visible={isAuthModalVisible}
+              onClose={() => setIsAuthModalVisible(false)}
+              onAuthSuccess={handleAuthSuccess}
+            />
     </View>
   );
 }

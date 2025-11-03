@@ -139,15 +139,15 @@ export default function Profile() {
       title: 'Order History',
       icon: 'shopping-bag',
       description: 'View your past orders and track current ones',
-      onPress: () => Alert.alert('Coming Soon', 'Order history feature coming soon!'),
+      onPress: () => router.push('/Orders'),
     },
-    {
-      id: 'wishlist',
-      title: 'Wishlist',
-      icon: 'heart',
-      description: 'Items you want to purchase later',
-      onPress: () => Alert.alert('Coming Soon', 'Wishlist feature coming soon!'),
-    },
+    // {
+    //   id: 'wishlist',
+    //   title: 'Wishlist',
+    //   icon: 'heart',
+    //   description: 'Items you want to purchase later',
+    //   onPress: () => Alert.alert('Coming Soon', 'Wishlist feature coming soon!'),
+    // },
     {
       id: 'addresses',
       title: 'Shipping Addresses',
@@ -155,13 +155,13 @@ export default function Profile() {
       description: 'Manage your delivery addresses',
       expandable: true,
     },
-    {
-      id: 'payment',
-      title: 'Payment Methods',
-      icon: 'credit-card',
-      description: 'Manage your payment options',
-      onPress: () => Alert.alert('Coming Soon', 'Payment methods feature coming soon!'),
-    },
+    // {
+    //   id: 'payment',
+    //   title: 'Payment Methods',
+    //   icon: 'credit-card',
+    //   description: 'Manage your payment options',
+    //   onPress: () => Alert.alert('Coming Soon', 'Payment methods feature coming soon!'),
+    // },
     {
       id: 'notifications',
       title: 'Notifications',
@@ -175,6 +175,13 @@ export default function Profile() {
       icon: 'help',
       description: 'Get help with your account and orders',
       onPress: () => router.push('/contact'),
+    },
+    {
+      id: 'admin',
+      title: 'Admin Panel',
+      icon: 'credit-card',
+      description: 'Manage your payment options',
+      onPress: () => router.push('/(admin)/AdminHome'),
     },
   ];
 
@@ -271,10 +278,10 @@ export default function Profile() {
             <Text style={styles.statNumber}>12</Text>
             <Text style={styles.statLabel}>Orders</Text>
           </View>
-          <View style={styles.statCard}>
+          {/* <View style={styles.statCard}>
             <Text style={styles.statNumber}>5</Text>
             <Text style={styles.statLabel}>Wishlist</Text>
-          </View>
+          </View> */}
           <View style={styles.statCard}>
             <Text style={styles.statNumber}>₹24,500</Text>
             <Text style={styles.statLabel}>Total Spent</Text>
@@ -320,7 +327,7 @@ export default function Profile() {
                       <Text style={styles.addressText}>
                         {userData?.address?.country || 'No country'}
                       </Text>
-                      <TouchableOpacity style={styles.editAddressButton}>
+                      <TouchableOpacity style={styles.editAddressButton} onPress={handleEditProfile}>
                         <Text style={styles.editAddressText}>Edit Address</Text>
                       </TouchableOpacity>
                     </View>
@@ -477,7 +484,7 @@ export default function Profile() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f5f5f0',
   },
   loadingContainer: {
     flex: 1,
@@ -497,7 +504,7 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     paddingHorizontal: 20,
     paddingBottom: 10,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f5f5f0',
   },
   backButton: {
     padding: 8,
@@ -616,6 +623,8 @@ const styles = StyleSheet.create({
   statCard: {
     flex: 1,
     backgroundColor: '#f8f9fa',
+    borderWidth: 1,
+    borderColor: '#eee',
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
@@ -636,7 +645,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   sectionCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#fafafa',
     borderRadius: 12,
     marginBottom: 12,
     elevation: 2,

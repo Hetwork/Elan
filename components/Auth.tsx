@@ -17,9 +17,12 @@ import {
   useSignUpWithPhoneNumber,
   useSignInWithPhoneNumber,
   useConfirmVerificationCode,
+  useCurrentUser,
+  useSignOut,
 } from '../firebase/Hooks/UseAuth';
 import { countries, Country } from '../utils/countries';
 import { IUser } from '../firebase/Types/User';
+import { OtpInput } from 'react-native-otp-entry';
 
 const { width, height } = Dimensions.get('window');
 
@@ -29,35 +32,53 @@ interface AuthModalProps {
   onAuthSuccess?: () => void;
 }
 
-type AuthStep = 'phone' | 'verification' | 'userDetails';
+type AuthStep = 'phone' | 'verification' | 'userDetails' | 'address';
 
 export const AuthModal: React.FC<AuthModalProps> = ({ visible, onClose, onAuthSuccess }) => {
   const [authStep, setAuthStep] = useState<AuthStep>('phone');
   const [isSignUp, setIsSignUp] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [selectedCountry, setSelectedCountry] = useState<Country>(
-    countries.find(c => c.code === 'US') || countries[0]
+    countries.find((c) => c.code === 'US') || countries[0]
   );
   const [showCountryPicker, setShowCountryPicker] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
-  const [verificationId, setVerificationId] = useState<any>(null);
-  
+  const [confirmation, setConfirmation] = useState<any>(null);
+
   // User details for sign up
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
 
+  const firstNameInputRef = useRef(null);
+  const lastNameInputRef = useRef(null);
+  const emailInputRef = useRef(null);
+
+  //User address for address step
+  const [street, setStreet] = useState('');
+  const [city, setCity] = useState('');
+  const [stateName, setStateName] = useState('');
+  const [zipCode, setZipCode] = useState('');
+  const [countryName, setCountryName] = useState('');
+
+  const streetInputRef = useRef(null);
+  const cityInputRef = useRef(null);
+  const stateInputRef = useRef(null);
+  const zipCodeInputRef = useRef(null);
+  const countryInputRef = useRef(null);
+
   // Hooks
   const signUpMutation = useSignUpWithPhoneNumber();
   const signInMutation = useSignInWithPhoneNumber();
   const confirmCodeMutation = useConfirmVerificationCode();
+  const { mutateAsync: signOut } = useSignOut();
 
   const resetModal = () => {
     setAuthStep('phone');
     setIsSignUp(false);
     setPhoneNumber('');
     setVerificationCode('');
-    setVerificationId(null);
+    setConfirmation(null);
     setFirstName('');
     setLastName('');
     setEmail('');
@@ -80,20 +101,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({ visible, onClose, onAuthSu
     }
 
     const fullPhoneNumber = formatPhoneNumber(phoneNumber);
-    
+
     try {
       // Try to sign in first (this will fail if user doesn't exist)
       try {
         const result = await signInMutation.mutateAsync(fullPhoneNumber);
         setIsSignUp(false);
-        setVerificationId(result);
+        setConfirmation(result);
         setAuthStep('verification');
       } catch (signInError: any) {
         // If sign in fails, try sign up
         if (signInError.message?.includes("doesn't exist")) {
           const result = await signUpMutation.mutateAsync(fullPhoneNumber);
           setIsSignUp(true);
-          setVerificationId(result);
+          setConfirmation(result);
           setAuthStep('verification');
         } else {
           throw signInError;
@@ -121,7 +142,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ visible, onClose, onAuthSu
         // For sign in, confirm code directly
         console.log('Confirming verification code for sign in...');
         await confirmCodeMutation.mutateAsync({
-          verificationId,
+          confirmation,
           code: verificationCode,
           isSignUp: false,
         });
@@ -140,6 +161,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({ visible, onClose, onAuthSu
       Alert.alert('Error', 'Please fill in all required fields');
       return;
     }
+    if (
+      !street.trim() ||
+      !city.trim() ||
+      !stateName.trim() ||
+      !zipCode.trim() ||
+      !countryName.trim()
+    ) {
+      Alert.alert('Error', 'Please fill in all address fields');
+      return;
+    }
 
     try {
       const userData: Partial<IUser> = {
@@ -154,11 +185,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({ visible, onClose, onAuthSu
         acceptedTerms: true,
         createdAt: new Date(),
         updatedAt: new Date(),
+        address: {
+          street,
+          city,
+          state: stateName,
+          zipCode,
+          country: countryName,
+          isDefault: true,
+        },
       };
 
       console.log('Confirming verification code and creating user...');
       await confirmCodeMutation.mutateAsync({
-        verificationId,
+        confirmation,
         code: verificationCode,
         isSignUp: true,
         userData,
@@ -168,7 +207,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ visible, onClose, onAuthSu
       handleAuthSuccess();
     } catch (error: any) {
       console.error('Sign up completion error:', error);
-      console.error('Error details:', JSON.stringify(error, null, 2));
       Alert.alert('Error', error.message || 'Failed to complete registration');
     }
   };
@@ -197,8 +235,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ visible, onClose, onAuthSu
                 onPress={() => {
                   setSelectedCountry(country);
                   setShowCountryPicker(false);
-                }}
-              >
+                }}>
                 <Text style={styles.countryFlag}>{country.flag}</Text>
                 <Text style={styles.countryName}>{country.name}</Text>
                 <Text style={styles.countryCode}>{country.dial_code}</Text>
@@ -218,10 +255,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ visible, onClose, onAuthSu
       </View>
 
       <View style={styles.phoneInputContainer}>
-        <TouchableOpacity
-          style={styles.countrySelector}
-          onPress={() => setShowCountryPicker(true)}
-        >
+        <TouchableOpacity style={styles.countrySelector} onPress={() => setShowCountryPicker(true)}>
           <Text style={styles.countryFlag}>{selectedCountry.flag}</Text>
           <Text style={styles.dialCode}>{selectedCountry.dial_code}</Text>
           <Feather name="chevron-down" size={16} color="#666" />
@@ -234,15 +268,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({ visible, onClose, onAuthSu
           onChangeText={setPhoneNumber}
           keyboardType="phone-pad"
           maxLength={15}
+          returnKeyType="done"
+          onSubmitEditing={handlePhoneSubmit}
         />
       </View>
 
       <TouchableOpacity
-        style={[styles.primaryButton, (signUpMutation.isPending || signInMutation.isPending) && styles.buttonDisabled]}
+        style={[
+          styles.primaryButton,
+          (signUpMutation.isPending || signInMutation.isPending) && styles.buttonDisabled,
+        ]}
         onPress={handlePhoneSubmit}
-        disabled={signUpMutation.isPending || signInMutation.isPending}
-      >
-        {(signUpMutation.isPending || signInMutation.isPending) ? (
+        disabled={signUpMutation.isPending || signInMutation.isPending}>
+        {signUpMutation.isPending || signInMutation.isPending ? (
           <ActivityIndicator color="white" />
         ) : (
           <Text style={styles.buttonText}>Continue</Text>
@@ -265,21 +303,39 @@ export const AuthModal: React.FC<AuthModalProps> = ({ visible, onClose, onAuthSu
         </Text>
       </View>
 
-      <TextInput
-        style={styles.codeInput}
-        placeholder="000000"
-        value={verificationCode}
-        onChangeText={setVerificationCode}
-        keyboardType="number-pad"
-        maxLength={6}
-        textAlign="center"
+      <OtpInput
+        numberOfDigits={6}
+        focusColor="#333"
+        focusStickBlinkingDuration={500}
+        onTextChange={(text) => setVerificationCode(text)}
+        onFilled={(text) => {
+          setVerificationCode(text);
+          console.log('OTP Filled:', text);
+        }}
+        theme={{
+          containerStyle: {
+            marginBottom: 30,
+          },
+          pinCodeContainerStyle: {
+            backgroundColor: '#f8f8f8',
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: '#e0e0e0',
+            width: 45,
+            height: 55,
+          },
+          pinCodeTextStyle: {
+            fontSize: 20,
+            fontWeight: '600',
+            color: '#333',
+          },
+        }}
       />
 
       <TouchableOpacity
         style={[styles.primaryButton, confirmCodeMutation.isPending && styles.buttonDisabled]}
         onPress={handleVerificationSubmit}
-        disabled={confirmCodeMutation.isPending}
-      >
+        disabled={confirmCodeMutation.isPending}>
         {confirmCodeMutation.isPending ? (
           <ActivityIndicator color="white" />
         ) : (
@@ -302,38 +358,116 @@ export const AuthModal: React.FC<AuthModalProps> = ({ visible, onClose, onAuthSu
 
       <View style={styles.inputContainer}>
         <TextInput
+          ref={firstNameInputRef}
           style={styles.textInput}
           placeholder="First Name"
           value={firstName}
           onChangeText={setFirstName}
           maxLength={50}
+          returnKeyType="next"
+          onSubmitEditing={() => lastNameInputRef.current?.focus()}
+          blurOnSubmit={false}
         />
         <TextInput
+          ref={lastNameInputRef}
           style={styles.textInput}
           placeholder="Last Name"
           value={lastName}
           onChangeText={setLastName}
           maxLength={50}
+          returnKeyType="next"
+          onSubmitEditing={() => emailInputRef.current?.focus()}
+          blurOnSubmit={false}
         />
         <TextInput
+          ref={emailInputRef}
           style={styles.textInput}
           placeholder="Email Address"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
           maxLength={100}
+          returnKeyType="done"
+          onSubmitEditing={() => setAuthStep('address')}
+          blurOnSubmit={false}
+        />
+      </View>
+
+      <TouchableOpacity style={styles.primaryButton} onPress={() => setAuthStep('address')}>
+        <Text style={styles.buttonText}>Next</Text>
+      </TouchableOpacity>
+    </ScrollView>
+  );
+
+  const renderAddressStep = () => (
+    <ScrollView contentContainerStyle={styles.scrollContent}>
+      <View style={styles.headerContainer}>
+        <Text style={styles.modalTitle}>Add Your Address</Text>
+        <Text style={styles.modalSubtitle}>We need your address details</Text>
+      </View>
+
+      <View style={styles.inputContainer}>
+        <TextInput
+          ref={streetInputRef}
+          style={styles.textInput}
+          placeholder="Street"
+          value={street}
+          onChangeText={setStreet}
+          returnKeyType="next"
+          onSubmitEditing={() => cityInputRef.current?.focus()}
+          blurOnSubmit={false}
+        />
+        <TextInput
+          ref={cityInputRef}
+          style={styles.textInput}
+          placeholder="City"
+          value={city}
+          onChangeText={setCity}
+          returnKeyType="next"
+          onSubmitEditing={() => stateInputRef.current?.focus()}
+          blurOnSubmit={false}
+        />
+        <TextInput
+          ref={stateInputRef}
+          style={styles.textInput}
+          placeholder="State"
+          value={stateName}
+          onChangeText={setStateName}
+          returnKeyType="next"
+          onSubmitEditing={() => zipCodeInputRef.current?.focus()}
+          blurOnSubmit={false}
+        />
+        <TextInput
+          ref={zipCodeInputRef}
+          style={styles.textInput}
+          placeholder="Zip Code"
+          value={zipCode}
+          onChangeText={setZipCode}
+          keyboardType="numeric"
+          returnKeyType="next"
+          onSubmitEditing={() => countryInputRef.current?.focus()}
+          blurOnSubmit={false}
+        />
+        <TextInput
+          ref={countryInputRef}
+          style={styles.textInput}
+          placeholder="Country"
+          value={countryName}
+          onChangeText={setCountryName}
+          returnKeyType="done"
+          onSubmitEditing={handleSignUpComplete}
+          blurOnSubmit={false}
         />
       </View>
 
       <TouchableOpacity
         style={[styles.primaryButton, confirmCodeMutation.isPending && styles.buttonDisabled]}
         onPress={handleSignUpComplete}
-        disabled={confirmCodeMutation.isPending}
-      >
+        disabled={confirmCodeMutation.isPending}>
         {confirmCodeMutation.isPending ? (
           <ActivityIndicator color="white" />
         ) : (
-          <Text style={styles.buttonText}>Complete Registration</Text>
+          <Text style={styles.buttonText}>Done</Text>
         )}
       </TouchableOpacity>
     </ScrollView>
@@ -341,12 +475,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ visible, onClose, onAuthSu
 
   return (
     <>
-      <Modal
-        visible={visible}
-        animationType="slide"
-        transparent
-        onRequestClose={handleClose}
-      >
+      <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <View style={styles.modalHeader}>
@@ -358,6 +487,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ visible, onClose, onAuthSu
             {authStep === 'phone' && renderPhoneStep()}
             {authStep === 'verification' && renderVerificationStep()}
             {authStep === 'userDetails' && renderUserDetailsStep()}
+            {authStep === 'address' && renderAddressStep()}
           </View>
         </View>
       </Modal>

@@ -17,9 +17,8 @@ export class UserService {
       updatedAt: new Date(),
     };
 
-    const { doc, setDoc } = await import('@react-native-firebase/firestore');
-    const userRef = doc(db, this.COLLECTION, currentUser.uid);
-    return await setDoc(userRef, userDoc);
+    const userRef = db.collection(this.COLLECTION).doc(currentUser.uid);
+    return await userRef.set(userDoc);
   }
 
   // Get user data
@@ -27,10 +26,30 @@ export class UserService {
     const userId = uid || auth.currentUser?.uid;
     if (!userId) throw new Error('No user ID provided');
 
-    const { doc, getDoc } = await import('@react-native-firebase/firestore');
-    const userRef = doc(db, this.COLLECTION, userId);
-    const userSnap = await getDoc(userRef);
-    return userSnap.exists() ? (userSnap.data() as IUser) : null;
+    console.log('UserService: Getting user data for:', userId);
+    
+    try {
+      const userRef = db.collection(this.COLLECTION).doc(userId);
+      const userSnap = await userRef.get();
+      
+      console.log('UserService: User document exists:', userSnap.exists);
+      
+      if (userSnap.exists) {
+        const userData = userSnap.data() as IUser;
+        console.log('UserService: User data retrieved:', {
+          hasFirstName: !!userData.firstName,
+          hasEmail: !!userData.email,
+          hasPhone: !!userData.phoneNumber,
+          hasAddress: !!userData.address,
+        });
+        return userData;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('UserService: Error getting user data:', error);
+      throw error;
+    }
   }
 
   // Update user data
@@ -43,9 +62,8 @@ export class UserService {
       updatedAt: new Date(),
     };
 
-    const { doc, updateDoc } = await import('@react-native-firebase/firestore');
-    const userRef = doc(db, this.COLLECTION, currentUser.uid);
-    return await updateDoc(userRef, updateData);
+    const userRef = db.collection(this.COLLECTION).doc(currentUser.uid);
+    return await userRef.update(updateData);
   }
 
   // Delete user data
@@ -53,26 +71,22 @@ export class UserService {
     const currentUser = auth.currentUser;
     if (!currentUser) throw new Error('No authenticated user');
 
-    const { doc, deleteDoc } = await import('@react-native-firebase/firestore');
-    const userRef = doc(db, this.COLLECTION, currentUser.uid);
-    return await deleteDoc(userRef);
+    const userRef = db.collection(this.COLLECTION).doc(currentUser.uid);
+    return await userRef.delete();
   }
 
   // Get all users (admin only)
   static async getAllUsers(): Promise<IUser[]> {
-    const { collection, getDocs } = await import('@react-native-firebase/firestore');
-    const usersRef = collection(db, this.COLLECTION);
-    const querySnapshot = await getDocs(usersRef);
-    return querySnapshot.docs.map(doc => doc.data() as IUser);
+    const usersRef = db.collection(this.COLLECTION);
+    const querySnapshot = await usersRef.get();
+    return querySnapshot.docs.map((doc: any) => doc.data() as IUser);
   }
 
   // Get users by role
   static async getUsersByRole(role: UserRole): Promise<IUser[]> {
-    const { collection, query, where, getDocs } = await import('@react-native-firebase/firestore');
-    const usersRef = collection(db, this.COLLECTION);
-    const q = query(usersRef, where('role', '==', role));
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => doc.data() as IUser);
+    const usersRef = db.collection(this.COLLECTION);
+    const querySnapshot = await usersRef.where('role', '==', role).get();
+    return querySnapshot.docs.map((doc: any) => doc.data() as IUser);
   }
 
   // Check if user profile is complete
@@ -80,13 +94,48 @@ export class UserService {
     const currentUser = auth.currentUser;
     if (!currentUser) return false;
 
-    const { doc, getDoc } = await import('@react-native-firebase/firestore');
-    const userRef = doc(db, this.COLLECTION, currentUser.uid);
-    const userSnap = await getDoc(userRef);
+    const userRef = db.collection(this.COLLECTION).doc(currentUser.uid);
+    const userSnap = await userRef.get();
     
-    if (!userSnap.exists()) return false;
+    if (!userSnap.exists) return false;
     
     const userData = userSnap.data() as IUser;
     return userData.isProfileComplete || false;
+  }
+
+  // Create test user data for debugging
+  static async createTestUser(): Promise<void> {
+    const currentUser = auth.currentUser;
+    if (!currentUser) throw new Error('No authenticated user');
+
+    const testUserData: Partial<IUser> = {
+      uid: currentUser.uid,
+      phoneNumber: currentUser.phoneNumber || "+91 9999999999",
+      firstName: "Test",
+      lastName: "User",
+      email: "test@example.com",
+      userType: "user",
+      role: "user",
+      isVerified: true,
+      isProfileComplete: true,
+      acceptedTerms: true,
+      address: {
+        street: "123 Test Street",
+        city: "Test City", 
+        state: "Test State",
+        zipCode: "123456",
+        country: "India",
+        isDefault: true,
+      },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    console.log('UserService: Creating test user data:', testUserData);
+    
+    const userRef = db.collection(this.COLLECTION).doc(currentUser.uid);
+    await userRef.set(testUserData);
+    
+    console.log('UserService: Test user data created successfully');
   }
 }

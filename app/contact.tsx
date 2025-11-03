@@ -1,24 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
-  StyleSheet,
   StatusBar,
   ScrollView,
   Modal,
   TextInput,
   Dimensions,
+  StyleSheet,
   Alert,
 } from 'react-native';
-import { AntDesign, Feather } from '@expo/vector-icons';
+import { AntDesign } from '@expo/vector-icons';
 
 const { width, height } = Dimensions.get('window');
 
 export default function Contact() {
   const [isFormModalVisible, setIsFormModalVisible] = useState(false);
   const [isSupportModalVisible, setIsSupportModalVisible] = useState(false);
-  const [expandedFAQ, setExpandedFAQ] = useState<number | null>(0); // First FAQ expanded by default
+  const [expandedFAQ, setExpandedFAQ] = useState<number | null>(0);
   const [acceptTerms, setAcceptTerms] = useState(false);
 
   // Form state
@@ -29,6 +29,13 @@ export default function Contact() {
     phone: '',
     message: '',
   });
+
+  // Refs for inputs
+  const firstNameRef = useRef<TextInput>(null);
+  const lastNameRef = useRef<TextInput>(null);
+  const emailRef = useRef<TextInput>(null);
+  const phoneRef = useRef<TextInput>(null);
+  const messageRef = useRef<TextInput>(null);
 
   const handleFormSubmit = () => {
     if (!formData.firstName || !formData.lastName || !formData.email || !formData.message) {
@@ -41,7 +48,6 @@ export default function Contact() {
     }
     Alert.alert('Success', 'Message sent successfully!');
     setIsFormModalVisible(false);
-    // Reset form
     setFormData({
       firstName: '',
       lastName: '',
@@ -55,26 +61,30 @@ export default function Contact() {
   const faqData = [
     {
       question: 'Are dinner plates safe for microwave use?',
-      answer: 'Most of our dinner plates are microwave safe, but it is important to check the specific product details. Plates that are labeled as microwave safe can be used without worry. However, avoid using plates with metallic accents in the microwave as they can cause sparks.',
+      answer:
+        'Most of our dinner plates are microwave safe, but it is important to check the specific product details. Plates that are labeled as microwave safe can be used without worry. However, avoid using plates with metallic accents in the microwave as they can cause sparks.',
     },
     {
       question: 'How to replace a damaged dinner plate',
-      answer: 'If you have a damaged dinner plate, please contact our customer service team with your order details and photos of the damage. We will help you process a replacement according to our warranty policy.',
+      answer:
+        'If you have a damaged dinner plate, please contact our customer service team with your order details and photos of the damage. We will help you process a replacement according to our warranty policy.',
     },
     {
       question: 'What is the warranty on dinner plates?',
-      answer: 'Our dinner plates come with a comprehensive warranty that covers manufacturing defects. The warranty period varies by product line, typically ranging from 1-3 years. Please check your specific product documentation for detailed warranty terms.',
+      answer:
+        'Our dinner plates come with a comprehensive warranty that covers manufacturing defects. The warranty period varies by product line, typically ranging from 1-3 years. Please check your specific product documentation for detailed warranty terms.',
     },
     {
       question: 'How to care for your dinner plates',
-      answer: 'To maintain your dinner plates, we recommend hand washing with mild soap and warm water. Avoid harsh abrasives and extreme temperature changes. For dishwasher-safe plates, use the gentle cycle and avoid overcrowding.',
+      answer:
+        'To maintain your dinner plates, we recommend hand washing with mild soap and warm water. Avoid harsh abrasives and extreme temperature changes. For dishwasher-safe plates, use the gentle cycle and avoid overcrowding.',
     },
   ];
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
-      
+
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
@@ -167,11 +177,15 @@ export default function Contact() {
                     First name <Text style={styles.required}>*</Text>
                   </Text>
                   <TextInput
+                    ref={firstNameRef}
                     style={styles.textInput}
                     placeholder="First name"
                     placeholderTextColor="#666"
                     value={formData.firstName}
-                    onChangeText={(text) => setFormData({...formData, firstName: text})}
+                    returnKeyType="next"
+                    onSubmitEditing={() => lastNameRef.current?.focus()}
+                    blurOnSubmit={false}
+                    onChangeText={(text) => setFormData({ ...formData, firstName: text })}
                   />
                 </View>
 
@@ -180,11 +194,15 @@ export default function Contact() {
                     Last name <Text style={styles.required}>*</Text>
                   </Text>
                   <TextInput
+                    ref={lastNameRef}
                     style={styles.textInput}
                     placeholder="Last name"
                     placeholderTextColor="#666"
                     value={formData.lastName}
-                    onChangeText={(text) => setFormData({...formData, lastName: text})}
+                    returnKeyType="next"
+                    onSubmitEditing={() => emailRef.current?.focus()}
+                    blurOnSubmit={false}
+                    onChangeText={(text) => setFormData({ ...formData, lastName: text })}
                   />
                 </View>
               </View>
@@ -195,13 +213,17 @@ export default function Contact() {
                     Email Address <Text style={styles.required}>*</Text>
                   </Text>
                   <TextInput
+                    ref={emailRef}
                     style={styles.textInput}
                     placeholder="example@mail.com"
                     placeholderTextColor="#666"
                     keyboardType="email-address"
                     autoCapitalize="none"
                     value={formData.email}
-                    onChangeText={(text) => setFormData({...formData, email: text})}
+                    returnKeyType="next"
+                    onSubmitEditing={() => phoneRef.current?.focus()}
+                    blurOnSubmit={false}
+                    onChangeText={(text) => setFormData({ ...formData, email: text })}
                   />
                 </View>
 
@@ -210,12 +232,16 @@ export default function Contact() {
                     Phone number <Text style={styles.required}>*</Text>
                   </Text>
                   <TextInput
+                    ref={phoneRef}
                     style={styles.textInput}
                     placeholder="+31 644 666 888"
                     placeholderTextColor="#666"
                     keyboardType="phone-pad"
                     value={formData.phone}
-                    onChangeText={(text) => setFormData({...formData, phone: text})}
+                    returnKeyType="next"
+                    onSubmitEditing={() => messageRef.current?.focus()}
+                    blurOnSubmit={false}
+                    onChangeText={(text) => setFormData({ ...formData, phone: text })}
                   />
                 </View>
               </View>
@@ -225,6 +251,7 @@ export default function Contact() {
                   Message <Text style={styles.required}>*</Text>
                 </Text>
                 <TextInput
+                  ref={messageRef}
                   style={[styles.textInput, styles.messageInput]}
                   placeholder="Type a message..."
                   placeholderTextColor="#666"
@@ -232,7 +259,9 @@ export default function Contact() {
                   numberOfLines={4}
                   textAlignVertical="top"
                   value={formData.message}
-                  onChangeText={(text) => setFormData({...formData, message: text})}
+                  returnKeyType="done"
+                  onSubmitEditing={handleFormSubmit}
+                  onChangeText={(text) => setFormData({ ...formData, message: text })}
                 />
               </View>
 
@@ -287,7 +316,7 @@ export default function Contact() {
                   >
                     <Text style={styles.faqQuestionText}>{faq.question}</Text>
                     <AntDesign
-                      name={expandedFAQ === index ? "minus" : "plus"}
+                      name={expandedFAQ === index ? 'minus' : 'plus'}
                       size={20}
                       color="#333"
                     />

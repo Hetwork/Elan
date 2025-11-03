@@ -11,7 +11,7 @@ export class AuthService {
       throw new Error("User already exists. Please sign in.");
     }
 
-    // Send OTP
+    // Send OTP and return confirmation object
     return await auth().signInWithPhoneNumber(phoneNumber);
   }
 
@@ -24,13 +24,13 @@ export class AuthService {
       throw new Error("User doesn't exist. Please sign up first.");
     }
 
+    // Send OTP and return confirmation object
     return await auth().signInWithPhoneNumber(phoneNumber);
   }
 
-  // Confirm verification code
-  static async confirmVerificationCode(verificationId: string, code: string) {
-    const credential = auth.PhoneAuthProvider.credential(verificationId, code);
-    return await auth().signInWithCredential(credential);
+  // Confirm verification code (using confirmation object directly)
+  static async confirmVerificationCode(confirmation: any, code: string) {
+    return await confirmation.confirm(code); // ✅ No credential needed
   }
 
   // Get current user

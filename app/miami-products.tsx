@@ -10,6 +10,8 @@ import {
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useGetProductsByCollectionIdFromFirestore } from '../firebase/Hooks/ProductsHook';
+import { useCart } from '../firebase/Hooks/UseCart';
+import { CartItem } from '../firebase/service/CartService';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -55,6 +57,9 @@ export default function MiamiProducts() {
   const { data: products = [], isLoading, error } =
     useGetProductsByCollectionIdFromFirestore(actualCollectionId, true);
 
+  // Cart hook
+  const { addItem } = useCart();
+
   // ✅ Hooks always called
   const scrollY = useSharedValue(0);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -74,6 +79,41 @@ export default function MiamiProducts() {
   });
 
   const getCurrentProduct = () => products[currentIndex] || products[0];
+
+  const HandleAddToCart = async () => {
+    console.log('🔴 BUTTON PRESSED! HandleAddToCart called'); // This should appear first
+    
+    try {
+      const currentProduct = getCurrentProduct();
+      
+      console.log('Current product:', currentProduct); // Debug log
+      
+      if (!currentProduct) {
+        console.error('No product selected');
+        return;
+      }
+
+      const cartItem: CartItem = {
+        productId: currentProduct.id.toString(),
+        productName: currentProduct.name,
+        image: currentProduct.image,
+        size: currentProduct.size, // You can add size selection functionality later
+        color: currentProduct.color, // You can add color selection functionality later
+        collectionName: currentProduct.collection_name,
+        quantity: 1,
+        price: currentProduct.price,
+      };
+
+      console.log('Adding cart item:', cartItem); // Debug log
+
+      await addItem.mutateAsync(cartItem);
+      console.log('Cart item added successfully'); // Debug log
+      // Success and error handling is now done in the UseCart hook via Toast
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      // Error toast is handled in UseCart hook
+    }
+  };
 
   // ✅ UI states handled inside return
   if (isLoading) {
@@ -137,10 +177,15 @@ export default function MiamiProducts() {
         </View>
 
         {/* Product info */}
-        <View style={styles.productInfoContainer}>
+        <View style={styles.productInfoContainer} pointerEvents="box-none">
+          <Text style={styles.productTitle}>₹{getCurrentProduct()?.price}</Text>
           <Text style={styles.productTitle}>{getCurrentProduct()?.name}</Text>
-          <TouchableOpacity style={styles.exploreButton}>
-            <Text style={styles.exploreText}>explore collection</Text>
+          <TouchableOpacity 
+            style={styles.exploreButton} 
+            onPress={HandleAddToCart}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.exploreText}>Buy Single Item</Text>
             <Text style={styles.arrow}>→</Text>
           </TouchableOpacity>
         </View>
@@ -219,7 +264,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 80,
     right: 30,
-    zIndex: 20,
+    zIndex: 200,
     alignItems: 'flex-end',
   },
   productTitle: { fontSize: 16, fontWeight: '500', color: '#333', marginBottom: 15 },

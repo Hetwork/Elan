@@ -3,6 +3,7 @@ import type { QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
 
 // Type definitions
 export interface Product {
+  price: ReactNode;
   id: number;
   name: string;
   image: string;
@@ -24,16 +25,16 @@ export const getAllProductsFromFirestore = async (): Promise<Product[]> => {
 
     const products: Product[] = querySnapshot.docs.map((docSnap: any) => {
       const data = docSnap.data();
-      console.log('Raw Firestore data:', data); // Debug log
+      // console.log('Raw Firestore data:', data); // Debug log
       const product = {
         id: data.id || Number(docSnap.id), // Use data.id if available, fallback to docSnap.id
         ...data,
       } as Product;
-      console.log('Processed product:', product); // Debug log
+      // console.log('Processed product:', product); // Debug log
       return product;
     });
 
-    console.log('Final products array:', products); // Debug log
+    // console.log('Final products array:', products); // Debug log
     return products;
   } catch (error) {
     console.error('Error getting products from Firestore:', error);

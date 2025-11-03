@@ -20,12 +20,15 @@ import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-g
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useGetProductsByCollectionIdFromFirestore } from '../firebase/Hooks/ProductsHook';
 import { useGetCollectionByIdFromFirestore } from '../firebase/Hooks/collectionHook';
+import { useCart } from "~/firebase/Hooks/UseCart";
+import { CartItem } from '../firebase/service/CartService';
 
 const { width, height } = Dimensions.get("window");
 
 export default function ElanHorizontalPager() {
   const params = useLocalSearchParams();
   const router = useRouter();
+  const { addItem } = useCart();
   
   // Get collection ID from params
   const collectionId = parseInt(params.collectionId as string) || 6;
@@ -33,7 +36,7 @@ export default function ElanHorizontalPager() {
   // Get collection data from the service
   const { data: collectionData, isLoading: collectionLoading } = useGetCollectionByIdFromFirestore(collectionId.toString());
 
-  console.log('Collection Data:', collectionData);
+  // console.log('Collection Data:', collectionData);
 
   // Get products for this collection from Firestore
   const { data: firestoreProducts = [], isLoading: productsLoading, error: productsError } = useGetProductsByCollectionIdFromFirestore(collectionId);
@@ -56,6 +59,7 @@ export default function ElanHorizontalPager() {
   const productCount = collectionData?.products || firestoreProducts.length || 7;
   const materials = collectionData?.materials || "Porcelain";
   const colorPalette = collectionData?.color_palette || "Green";
+  const price = collectionData?.price || 0;
   
   // Use Firebase products if available, otherwise fallback to default products
   const products = firestoreProducts && firestoreProducts.length > 0 ? firestoreProducts : [
@@ -98,6 +102,41 @@ export default function ElanHorizontalPager() {
   
   const translateX = useSharedValue(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const HandleAddToCart = async () => {
+      console.log('🔴 BUTTON PRESSED! HandleAddToCart called'); // This should appear first
+      
+      try {
+        // const currentProduct = getCurrentProduct();
+        
+        // console.log('Current product:', currentProduct); // Debug log
+        
+        // if (!currentProduct) {
+        //   console.error('No product selected');
+        //   return;
+        // }
+  
+        const cartItem: CartItem = {
+          productId: collectionData?.id.toString(),
+          productName: collectionData?.name,
+          image: collectionData?.main_image[0],
+          size: collectionData?.products, // You can add size selection functionality later
+          color: collectionData?.color, // You can add color selection functionality later
+          collectionName: collectionData?.name,
+          quantity: 1,
+          price: collectionData?.price,
+        };
+  
+        console.log('Adding cart item:', cartItem); // Debug log
+  
+        await addItem.mutateAsync(cartItem);
+        console.log('Cart item added successfully'); // Debug log
+        // Success and error handling is now done in the UseCart hook via Toast
+      } catch (error) {
+        console.error('Error adding to cart:', error);
+        // Error toast is handled in UseCart hook
+      }
+    };
 
   // Horizontal swipe controls horizontal scrolling
   const horizontalSwipe = Gesture.Pan().onChange((e) => {
@@ -162,12 +201,19 @@ export default function ElanHorizontalPager() {
       
       {/* Navigation Buttons */}
       <View style={styles.heroNavigation}>
-        <TouchableOpacity style={[styles.navButton, { borderColor: dynamicTextColor }]} onPress={() => setCurrentImageIndex(prev => prev === 0 ? 1 : 0)}>
+        <TouchableOpacity style={[styles.navButton, { borderColor: dynamicTextColor }]} onPress={() => setCurrentImageIndex(prev => prev === 0 ? images.length - 1 : prev - 1)}>
           <Text style={[styles.navButtonText, { color: dynamicTextColor }]}>←</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.navButton, { borderColor: dynamicTextColor }]} onPress={() => setCurrentImageIndex(prev => prev === 0 ? 1 : 0)}>
+        <TouchableOpacity style={[styles.navButton, { borderColor: dynamicTextColor }]} onPress={() => setCurrentImageIndex(prev => prev === images.length - 1 ? 0 : prev + 1)}>
           <Text style={[styles.navButtonText, { color: dynamicTextColor }]}>→</Text>
         </TouchableOpacity>
+        {/* Buy Button */}
+          <TouchableOpacity 
+            style={[styles.buyButton, { backgroundColor: dynamicTextColor }]}
+            onPress={HandleAddToCart}
+          >
+            <Text style={[styles.buyButtonText, { color: dynamicBackgroundColor }]}>Buy Collection</Text>
+          </TouchableOpacity>
       </View>
     </View>
   );
@@ -204,7 +250,14 @@ export default function ElanHorizontalPager() {
               <Text style={[styles.heroSpecLabel, { color: dynamicTextColor }]}>Color Palette</Text>
               <Text style={[styles.heroSpecValue, { color: dynamicTextColor }]}>{colorPalette}</Text>
             </View>
+            
+            <View style={[styles.heroSpecRow, { borderBottomColor: dynamicTextColor }]}>
+              <Text style={[styles.heroSpecLabel, { color: dynamicTextColor }]}>Price</Text>
+              <Text style={[styles.heroSpecValue, { color: dynamicTextColor }]}>₹{price}</Text>
+            </View>
           </View>
+          
+          
         </View>
         
         <Image source={{ uri: collectionImage }} style={styles.collectionImg} resizeMode="cover" />
@@ -657,5 +710,22 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 16,
     fontWeight: '500',
+  },
+  buyButton: {
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 8,
+    marginLeft: 50,
+    alignSelf: 'flex-start',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  buyButtonText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });

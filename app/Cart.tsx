@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -9,112 +9,200 @@ import {
   FlatList,
   SafeAreaView,
   StatusBar,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import RazorpayCheckout from 'react-native-razorpay';
 import { router } from 'expo-router';
+import { useCart } from '../firebase/Hooks/UseCart';
+import { useCreateOrderFromCart } from '../firebase/Hooks/UseOrder';
+import { useCurrentUserData, useCreateTestUser } from '../firebase/Hooks/UseAuth';
+import { UserService } from '../firebase/service/UserService';
+import { CartItem } from '../firebase/service/CartService';
 
 const { width } = Dimensions.get('window');
 
-// Mock cart data - replace with your actual cart hook
-const mockCartItems = [
-  {
-    id: 1,
-    name: "Bowl ø 9",
-    image: "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836e0c3b1aeba6d47db3e90_Bowl%209-1.webp",
-    price: 42.00,
-    quantity: 2,
-    size: "9 cm",
-    color: "Green",
-    collection: "Coco Green"
-  },
-  {
-    id: 2,
-    name: "Deep Plate ø 16",
-    image: "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836e05bf598be5f1ff311d7_Deep%20plate%2016-1.webp",
-    price: 58.00,
-    quantity: 1,
-    size: "16 cm",
-    color: "Green",
-    collection: "Coco Green"
-  },
-  {
-    id: 3,
-    name: "Plate ø 19",
-    image: "https://cdn.prod.website-files.com/677b8a552071e1f09b594a24/6836dfe00c3d21f37b42b89b_Plate%2019-2.webp",
-    price: 65.00,
-    quantity: 3,
-    size: "19 cm",
-    color: "Green",
-    collection: "Coco Green"
-  },
-];
-
 export default function Cart() {
-  const [cartItems, setCartItems] = useState(mockCartItems);
-  const handleCheckout = (total: number) => {
-  const razorpayKey = process.env.EXPO_PUBLIC_RAZORPAY_KEY;
-  if (!razorpayKey) {
-    alert('Razorpay key not configured');
-    return;
-  }
+  // Use the actual cart hook instead of mock data
+  const { cartQuery, updateItem, deleteItem } = useCart();
+  const { data: cartItems = [], isLoading, error } = cartQuery;
+  
+  // Get current user data
+  const { data: userData, isLoading: userLoading, error: userError } = useCurrentUserData();
+  
+  // Order creation hook
+  const createOrderFromCart = useCreateOrderFromCart();
+  
+  // Test user creation hook
+  const createTestUser = useCreateTestUser();
 
-  var options = {
-    description: 'Order Payment',
-    image: 'assets/icon.png',
-    currency: 'INR',
-    key: razorpayKey,
-    amount: total * 100, // Amount in paise
-    name: 'Elan',
-    // prefill: {
-    //   email: 'info@elan.com',
-    //   contact: '+31 541 581 600',
+  // Debug user data
+  React.useEffect(() => {
+    console.log('Cart - User data:', userData ? {
+      hasFirstName: !!userData.firstName,
+      hasEmail: !!userData.email,
+      hasPhone: !!userData.phoneNumber,
+      hasAddress: !!userData.address,
+      addressComplete: !!(userData.address?.street && userData.address?.city && userData.address?.state && userData.address?.zipCode && userData.address?.country),
+    } : 'No user data');
+  }, [userData]);
 
-    //   name: 'hackzilla',
-    // },
-    theme: { color: '#f8f8f3' },
+  const handleCheckout = async (total: number) => {
+    if (cartItems.length === 0) {
+      Alert.alert('Error', 'Your cart is empty');
+      return;
+    }
+
+    // Check if user data is loaded
+    if (userLoading) {
+      Alert.alert('Please Wait', 'Loading user information...');
+      return;
+    }
+
+    // Check if user data exists
+    if (!userData) {
+      Alert.alert(
+        'Profile Incomplete', 
+        'Please complete your profile before placing an order',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Go to Profile', onPress: () => router.push('/profile' as any) }
+        ]
+      );
+      return;
+    }
+
+    // Check if user has address
+    if (!userData.address || 
+        !userData.address.street || 
+        !userData.address.city || 
+        !userData.address.state || 
+        !userData.address.zipCode || 
+        !userData.address.country) {
+      Alert.alert(
+        'Address Required', 
+        'Please add your delivery address before placing an order',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Add Address', onPress: () => router.push('/profile' as any) }
+        ]
+      );
+      return;
+    }
+
+    // Check if user has required info
+    if (!userData.firstName || !userData.email || !userData.phoneNumber) {
+      Alert.alert(
+        'Profile Incomplete', 
+        'Please complete your profile information (name, email, phone) before placing an order',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Complete Profile', onPress: () => router.push('/profile' as any) }
+        ]
+      );
+      return;
+    }
+
+    const razorpayKey = process.env.EXPO_PUBLIC_RAZORPAY_KEY;
+    if (!razorpayKey) {
+      Alert.alert('Error', 'Razorpay key not configured');
+      return;
+    }
+
+    // Use real user data instead of hardcoded values
+    const userDetails = {
+      name: `${userData.firstName} ${userData.lastName || ''}`.trim(),
+      email: userData.email,
+      phone: userData.phoneNumber,
+      address: {
+        street: userData.address.street,
+        city: userData.address.city,
+        state: userData.address.state,
+        zipCode: userData.address.zipCode,
+        country: userData.address.country,
+      },
+    };
+
+    const options = {
+      description: 'Order Payment',
+      image: 'assets/icon.png',
+      currency: 'INR',
+      key: razorpayKey,
+      amount: total * 100, // Amount in paise
+      name: 'Elan',
+      theme: { color: '#f8f8f3' },
+    };
+
+    try {
+      const paymentResult = await RazorpayCheckout.open(options);
+      
+      // Create order after successful payment
+      await createOrderFromCart.mutateAsync({
+        cartItems,
+        userDetails,
+        paymentMethod: 'razorpay',
+        paymentId: paymentResult.razorpay_payment_id,
+      });
+
+      Alert.alert(
+        'Success!', 
+        `Payment successful! Order created with payment ID: ${paymentResult.razorpay_payment_id}`,
+        [
+          {
+            text: 'OK',
+            onPress: () => router.push('/'),
+          },
+        ]
+      );
+    } catch (error: any) {
+      if (error.code === 'PAYMENT_CANCELLED') {
+        Alert.alert('Payment Cancelled', 'You cancelled the payment');
+      } else {
+        Alert.alert('Error', `Payment failed: ${error.description || error.message}`);
+        console.error('Payment/Order error:', error);
+      }
+    }
   };
-  RazorpayCheckout.open(options)
-    .then((data) => {
-      // handle success
-      alert(`Success: ${data.razorpay_payment_id}`);
-    })
-    .catch((error) => {
-      // handle failure
-      alert(`Error: ${error.code} | ${error.description}`);
-    });
-};
-
   // Calculate totals
   const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const tax = subtotal * 0.18; // 21% VAT
+  const tax = subtotal * 0.18; // 18% tax
   const total = subtotal + tax;
 
-  const updateQuantity = (id: number, change: number) => {
-    setCartItems(prevItems =>
-      prevItems.map(item => {
-        if (item.id === id) {
-          const newQuantity = Math.max(0, item.quantity + change);
-          return newQuantity === 0 ? null : { ...item, quantity: newQuantity };
-        }
-        return item;
-      }).filter(Boolean) as typeof mockCartItems
-    );
+  const updateQuantity = async (productId: string, change: number) => {
+    const currentItem = cartItems.find(item => item.productId === productId);
+    if (!currentItem) return;
+
+    const newQuantity = Math.max(0, currentItem.quantity + change);
+    
+    if (newQuantity === 0) {
+      await deleteItem.mutateAsync(productId);
+    } else {
+      await updateItem.mutateAsync({
+        productId,
+        updates: { quantity: newQuantity }
+      });
+    }
   };
 
-  const removeItem = (id: number) => {
-    setCartItems(prevItems => prevItems.filter(item => item.id !== id));
+  const removeItem = async (productId: string) => {
+    await deleteItem.mutateAsync(productId);
   };
 
-  const renderCartItem = ({ item }: { item: typeof mockCartItems[0] }) => (
+  const renderCartItem = ({ item }: { item: CartItem }) => (
     <View style={styles.cartItem}>
       <Image source={{ uri: item.image }} style={styles.itemImage} />
 
       <View style={styles.itemDetails}>
         <View>
-          <Text style={styles.itemName}>{item.name}</Text>
-          <Text style={styles.itemCollection}>{item.collection}</Text>
+          <Text style={styles.itemName}>{item.productName}</Text>
+          <Text style={styles.itemCollection}>{item.collectionName}</Text>
+          {item.collectionName === item.productName ? (
+            <Text style={styles.itemSpecs}>Items: {item.size}</Text>
+          ):(
+
           <Text style={styles.itemSpecs}>Size: {item.size} • Color: {item.color}</Text>
+          )}
         </View>
 
         <View style={styles.bottomRow}>
@@ -123,7 +211,7 @@ export default function Cart() {
           <View style={styles.quantityControls}>
             <TouchableOpacity 
               style={styles.quantityButton} 
-              onPress={() => updateQuantity(item.id, -1)}
+              onPress={() => updateQuantity(item.productId, -1)}
             >
               <Ionicons name="remove" size={14} color="#333" />
             </TouchableOpacity>
@@ -132,7 +220,7 @@ export default function Cart() {
 
             <TouchableOpacity 
               style={styles.quantityButton} 
-              onPress={() => updateQuantity(item.id, 1)}
+              onPress={() => updateQuantity(item.productId, 1)}
             >
               <Ionicons name="add" size={14} color="#333" />
             </TouchableOpacity>
@@ -140,7 +228,7 @@ export default function Cart() {
 
           <TouchableOpacity 
             style={styles.trashButton} 
-            onPress={() => removeItem(item.id)}
+            onPress={() => removeItem(item.productId)}
           >
             <Ionicons name="trash-outline" size={18} color="#999" />
           </TouchableOpacity>
@@ -148,6 +236,45 @@ export default function Cart() {
       </View>
     </View>
   );
+
+  // Show loading state
+  if (isLoading || userLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="dark-content" backgroundColor="#f8f8f3" />
+        <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+          <ActivityIndicator size="large" color="#333" />
+          <Text style={{ marginTop: 10, color: '#333' }}>
+            {isLoading ? 'Loading cart...' : 'Loading user data...'}
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Show error state
+  if (error || userError) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="dark-content" backgroundColor="#f8f8f3" />
+        <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+          <Ionicons name="alert-circle-outline" size={80} color="#ccc" />
+          <Text style={{ marginTop: 10, color: '#333', fontSize: 16 }}>
+            {error ? 'Error loading cart' : 'Error loading user data'}
+          </Text>
+          <TouchableOpacity 
+            onPress={() => {
+              if (error) cartQuery.refetch();
+              // Note: You might want to add a refetch for user data as well
+            }} 
+            style={styles.continueShoppingButton}
+          >
+            <Text style={styles.continueShoppingText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -179,7 +306,7 @@ export default function Cart() {
           ) : (
             <FlatList
               data={cartItems}
-              keyExtractor={(item) => item.id.toString()}
+              keyExtractor={(item) => item.productId || item.id || Math.random().toString()}
               renderItem={renderCartItem}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={styles.cartList}
@@ -229,6 +356,28 @@ export default function Cart() {
             <TouchableOpacity style={styles.continueShoppingButton} onPress={() => router.back()}>
               <Text style={styles.continueShoppingText}>Continue Shopping</Text>
             </TouchableOpacity>
+            
+            {/* Debug: Create test user data */}
+            {!userData && (
+              <TouchableOpacity 
+                style={[styles.continueShoppingButton, { backgroundColor: '#e74c3c', marginTop: 10 }]} 
+                onPress={async () => {
+                  try {
+                    console.log('Creating test user data...');
+                    await createTestUser.mutateAsync();
+                    Alert.alert('Success', 'Test user data created successfully!');
+                  } catch (error: any) {
+                    console.error('Test user creation failed:', error);
+                    Alert.alert('Error', error.message || 'Failed to create test user data');
+                  }
+                }}
+                disabled={createTestUser.isPending}
+              >
+                <Text style={[styles.continueShoppingText, { color: 'white' }]}>
+                  {createTestUser.isPending ? 'Creating...' : 'Create Test User Data (Debug)'}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       )}

@@ -168,7 +168,7 @@ export default function About() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f5f5f0',
   },
   header: {
     flexDirection: 'row',
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     paddingHorizontal: 20,
     paddingBottom: 10,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f5f5f0',
   },
   backButton: {
     padding: 8,
@@ -238,6 +238,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
+    borderColor: '#e2e8f0',
+    borderWidth: 1,
   },
   valueHeader: {
     flexDirection: 'row',

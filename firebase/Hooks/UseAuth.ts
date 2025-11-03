@@ -3,14 +3,14 @@ import { AuthService } from '../service/AuthService';
 import { UserService } from '../service/UserService';
 import { IUser } from '../Types/User';
 
-// Sign up with phone number
+// Sign up with phone number (returns confirmation object)
 export const useSignUpWithPhoneNumber = () => {
   return useMutation({
     mutationFn: (phoneNumber: string) => AuthService.signUpWithPhoneNumber(phoneNumber),
   });
 };
 
-// Sign in with phone number
+// Sign in with phone number (returns confirmation object)
 export const useSignInWithPhoneNumber = () => {
   return useMutation({
     mutationFn: (phoneNumber: string) => AuthService.signInWithPhoneNumber(phoneNumber),
@@ -18,22 +18,26 @@ export const useSignInWithPhoneNumber = () => {
 };
 
 // Confirm verification code
-// Confirm verification code and create user on signup
 export const useConfirmVerificationCode = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ verificationId, code, isSignUp, userData }: { 
-      verificationId: any; 
-      code: string; 
+    mutationFn: async ({
+      confirmation,
+      code,
+      isSignUp,
+      userData,
+    }: {
+      confirmation: any;
+      code: string;
       isSignUp?: boolean;
       userData?: Partial<IUser>;
     }) => {
-      const result = await AuthService.confirmVerificationCode(verificationId, code);
-      
+      const result = await AuthService.confirmVerificationCode(confirmation, code);
+
       if (isSignUp && userData) {
         await UserService.createUser(userData);
       }
-      
+
       return result;
     },
     onSuccess: () => {
@@ -42,7 +46,6 @@ export const useConfirmVerificationCode = () => {
     },
   });
 };
-
 
 // Get current user
 export const useCurrentUser = () => {
@@ -80,5 +83,40 @@ export const useCheckUserExists = (phoneNumber: string) => {
     queryKey: ['userExists', phoneNumber],
     queryFn: () => AuthService.checkUserExists(phoneNumber),
     enabled: !!phoneNumber,
+  });
+};
+
+// Get current user data from Firestore
+export const useCurrentUserData = () => {
+  return useQuery({
+    queryKey: ['currentUserData'],
+    queryFn: async () => {
+      const userData = await UserService.getUserData();
+      console.log('Current user data:', userData);
+      return userData;
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+// Update user data
+export const useUpdateUserData = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (userData: Partial<IUser>) => UserService.updateUser(userData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['currentUserData'] });
+    },
+  });
+};
+
+// Create test user data
+export const useCreateTestUser = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => UserService.createTestUser(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['currentUserData'] });
+    },
   });
 };

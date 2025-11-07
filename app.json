@@ -29,7 +29,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#f8f8f3"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -40,9 +40,10 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#f8f8f3"
       },
-      "package": "com.het0312.Elan"
+      "package": "com.het0312.Elan",
+      "googleServicesFile": "./google-services.json"
     },
     "extra": {
       "router": {},

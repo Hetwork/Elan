@@ -8,15 +8,22 @@ import {
   Dimensions,
   FlatList,
   Animated,
+  Alert,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
-  productCount: string;
-  image: string;
+  productCount?: string;
+  image?: string;
+  main_image?: string;
+  cut_image?: string;
+  description?: string;
+  colors?: string[];
+  text_colors?: string[];
 }
 
 interface GridViewProps {
@@ -24,6 +31,19 @@ interface GridViewProps {
 }
 
 export default function GridView({ products }: GridViewProps) {
+  const router = useRouter();
+  
+  // Handle navigation to horizontal page with collection data
+  const handleProductPress = (collection: Product) => {
+    // Just pass the collection ID, let horizontal page fetch complete data
+    router.push({
+      pathname: '/horizontal',
+      params: {
+        collectionId: collection.id.toString(),
+      },
+    });
+  };
+
   // Animation values for each item
   const animationValues = useRef(
     products.map(() => ({
@@ -69,10 +89,10 @@ export default function GridView({ products }: GridViewProps) {
   // Render Grid View Product Card
   const renderProductCard = ({ item, index }: { item: Product; index: number }) => (
     <View style={styles.productCard}>
-      <TouchableOpacity>
+      <TouchableOpacity onPress={() => handleProductPress(item)}>
         <View style={styles.imageContainer}>
           <Animated.Image 
-            source={{ uri: item.image }} 
+            source={{ uri: item.main_image || item.image || '' }} 
             style={[
               styles.gridProductImage,
               {
@@ -88,7 +108,7 @@ export default function GridView({ products }: GridViewProps) {
         </View>
         <View style={styles.productInfo}>
           <Text style={styles.productName}>{item.name}</Text>
-          <Text style={styles.productCount}>{item.productCount}</Text>
+          <Text style={styles.productCount}>{item.productCount || 'Collection'}</Text>
         </View>
       </TouchableOpacity>
     </View>
@@ -149,10 +169,10 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   gridProductImage: {
-    width: '80%',
-    height: '80%',
-    borderRadius: 100,
-    resizeMode: 'cover',
+    width: '100%',
+    height: '100%',
+    // borderRadius: 100,
+    resizeMode: 'contain'
   },
   productInfo: {
     padding: 20,

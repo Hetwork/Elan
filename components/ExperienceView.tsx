@@ -6,8 +6,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   Animated,
+  Alert,
 } from 'react-native';
 import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view';
+import { useRouter } from 'expo-router';
 
 const { width, height } = Dimensions.get('window');
 
@@ -16,6 +18,7 @@ interface Product {
   name: string;
   productCount: string;
   image: string;
+  collection_id: number;
 }
 
 interface ExperienceViewProps {
@@ -23,6 +26,7 @@ interface ExperienceViewProps {
 }
 
 export default function ExperienceView({ products }: ExperienceViewProps) {
+  const router = useRouter();
   const numColumns = 5; // number of images per row
   const spacing = 20; // space between images
   const imageSize = 100;
@@ -116,8 +120,11 @@ export default function ExperienceView({ products }: ExperienceViewProps) {
                   ],
                 },
               ]}>
+                {console.log(item.collection_id)}
               <TouchableOpacity
-                onPress={() => alert(`Clicked on ${item.name}`)}
+                onPress={() => {
+                   router.push(`/miami-products?collectionId=${item.collection_id}`);
+                }}
                 style={styles.touchableArea}>
                 <Image source={{ uri: item.image }} style={styles.productImage} />
               </TouchableOpacity>
